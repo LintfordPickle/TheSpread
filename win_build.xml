@@ -1,8 +1,8 @@
 <!-- ====================================================================== 
      04.07.2018                                                        
 
-     project     :	Excavatoino
-     description :	Creates a JAR for both the Server and Client versions of Excavation
+     project     :	
+     description :	
      
 			     	root / 
 					    build /         // all items of subfolders within this directory are included *within* the jar
@@ -15,7 +15,6 @@
 
 ====================================================================== -->
 
-<!-- LDLibrary Build  -->
 <project name="EmptyProject" basedir="." default="main">
 
 	<property name="build-drive">f:</property>

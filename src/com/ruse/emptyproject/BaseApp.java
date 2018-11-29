@@ -9,39 +9,38 @@ public class BaseApp extends LintfordCore {
 		GameInfo lGameInfo = new GameInfo() {
 			@Override
 			public String applicationName() {
-				return "Unnamed";
+				return "";
 			}
 
 			@Override
 			public String windowTitle() {
-				return "EmptyGame";
+				return "";
 			}
 
 			@Override
-			public int windowWidth() {
-				return 800;
+			public int defaultWindowWidth() {
+				return 640;
 			}
 
 			@Override
-			public int windowHeight() {
-				return 600;
+			public int defaultWindowHeight() {
+				return 480;
 			}
 
 			@Override
 			public boolean windowResizeable() {
-				return true;
+				return false;
 			}
 
 		};
 
-		// ExcavationClient def constructor will automatically create a window and load the previous
-		// settings (if they exist).
 		BaseApp lClient = new BaseApp(lGameInfo);
 		lClient.createWindow();
 	}
 
 	public BaseApp(GameInfo pGameInfo) {
 		super(pGameInfo);
+		
 	}
 
 }
