@@ -1,8 +1,8 @@
 <!-- ====================================================================== 
-     04.07.2018                                                        
+     01.12.2018                                                        
 
-     project     :	
-     description :	
+     project     :	The Spread
+     description :	Game made in 48 hours for Ludum Dare #43
      
 			     	root / 
 					    build /         // all items of subfolders within this directory are included *within* the jar
@@ -15,12 +15,12 @@
 
 ====================================================================== -->
 
-<project name="EmptyProject" basedir="." default="main">
+<project name="Spread" basedir="." default="main">
 
 	<property name="build-drive">f:</property>
-	<property name="project.name">EmptyProject</property>
+	<property name="project.name">Spread</property>
 
-	<property name="client-main-class">com.ruse.emptyproject.BaseApp</property>
+	<property name="client-main-class">com.ruse.spread.BaseGame</property>
 
 	<!-- Input directories -->
 	<property name="input.src.dir" value="src" />
@@ -64,15 +64,15 @@
 			</fileset>
 		</copy>
 
-		<!-- Copy the LDLibrary and its dependencies JARs into the game distribution directory. --> 
+		<!-- Copy the LDLibrary and its dependencies JARs into the game distribution directory. -->
 		<copy todir="${dist.dir}/">
 			<fileset dir="f:/dist/java/LDLibrary/bin">
 				<include name="**/*.jar" />
-				<exclude name="**/*javadoc*"/>
-				<exclude name="**/*sources*"/>
-				<exclude name="**/*linux*"/>
-				<exclude name="**/*macos*"/>
-				<exclude name="LDLibrary.jar"/>
+				<exclude name="**/*javadoc*" />
+				<exclude name="**/*sources*" />
+				<exclude name="**/*linux*" />
+				<exclude name="**/*macos*" />
+				<exclude name="LDLibrary.jar" />
 			</fileset>
 		</copy>
 
@@ -85,10 +85,10 @@
 		<!-- Copy any other JAR dependency files declared by the game. -->
 		<copy todir="${dist.lib}">
 			<fileset dir="${basedir}/${input.lib.dir}">
-				<exclude name="**/*javadoc*"/>
-				<exclude name="**/*src*"/>
-				<exclude name="**/*linux*"/>
-				<exclude name="**/*macos*"/>
+				<exclude name="**/*javadoc*" />
+				<exclude name="**/*src*" />
+				<exclude name="**/*linux*" />
+				<exclude name="**/*macos*" />
 				<include name="**/*.*" />
 			</fileset>
 		</copy>
@@ -120,7 +120,8 @@
 	<target name="createjar" depends="compile">
 		<echo message="createjar" />
 		<jar destfile="${dist.jar}/${project.name}.jar" basedir="${build.dir}/classes">
-			<fileset dir="${build.dir}/res" /> <!-- include the res folder from within the build dir (which contains res from the LDLibrary to embed in JAR) -->
+			<fileset dir="${build.dir}/res" />
+			<!-- include the res folder from within the build dir (which contains res from the LDLibrary to embed in JAR) -->
 			<manifest>
 				<attribute name="Main-Class" value="${client-main-class}" />
 				<attribute name="Class-Path" value="${manifest.classpath}" />
