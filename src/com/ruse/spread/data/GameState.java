@@ -20,6 +20,11 @@ public class GameState extends BaseData {
 	public int food; // food in HQ
 	public int metals; // metals in HQ
 
+	public int difficultyLevelMax = 5;
+	public int difficultyLevel = 1;
+	public final float difficultyTime = 40000; // ms
+	public float difficultyTimer;
+
 	// ---------------------------------------------
 	// Constructor
 	// ---------------------------------------------
@@ -28,10 +33,6 @@ public class GameState extends BaseData {
 		startNewGame();
 
 	}
-
-	// ---------------------------------------------
-	// Core-Methods
-	// ---------------------------------------------
 
 	// ---------------------------------------------
 	// Methods
@@ -43,6 +44,9 @@ public class GameState extends BaseData {
 		populationWorld = 0;
 		metals = 0;
 		food = 0;
+
+		difficultyLevel = 1;
+		difficultyTimer = 0;
 
 	}
 

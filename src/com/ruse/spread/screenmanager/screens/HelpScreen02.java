@@ -8,11 +8,10 @@ import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
 import net.lintford.library.screenmanager.MenuEntry;
 import net.lintford.library.screenmanager.MenuScreen;
 import net.lintford.library.screenmanager.ScreenManager;
-import net.lintford.library.screenmanager.entries.HorizontalEntryGroup;
 import net.lintford.library.screenmanager.layouts.BaseLayout;
 import net.lintford.library.screenmanager.layouts.ListLayout;
 
-public class HelpScreen extends MenuScreen {
+public class HelpScreen02 extends MenuScreen {
 
 	// --------------------------------------
 	// Constants
@@ -31,7 +30,7 @@ public class HelpScreen extends MenuScreen {
 	// Constructor
 	// --------------------------------------
 
-	public HelpScreen(ScreenManager pScreenManager) {
+	public HelpScreen02(ScreenManager pScreenManager) {
 		super(pScreenManager, "");
 
 		mPaddingTop = 460f;
@@ -39,17 +38,11 @@ public class HelpScreen extends MenuScreen {
 		BaseLayout lNavLayout = new ListLayout(this);
 
 		MenuEntry lResumeGame = new MenuEntry(pScreenManager, lNavLayout, "Resume");
-		MenuEntry lNextPage = new MenuEntry(pScreenManager, lNavLayout, "next Page");
 
 		// Click handlers
 		lResumeGame.registerClickListener(this, BUTTON_RESUME);
-		lNextPage.registerClickListener(this, BUTTON_NEXTPAGE);
 
-		HorizontalEntryGroup lHorizontalEntry = new HorizontalEntryGroup(pScreenManager, lNavLayout);
-		lHorizontalEntry.addEntry(lResumeGame);
-		lHorizontalEntry.addEntry(lNextPage);
-
-		lNavLayout.menuEntries().add(lHorizontalEntry);
+		lNavLayout.menuEntries().add(lResumeGame);
 
 		layouts().add(lNavLayout);
 
@@ -65,7 +58,7 @@ public class HelpScreen extends MenuScreen {
 	public void loadGLContent(ResourceManager pResourceManager) {
 		super.loadGLContent(pResourceManager);
 
-		mBackgroundTexture = TextureManager.textureManager().loadTexture("HelpScreen1", "res/textures/screens/help01.png");
+		mBackgroundTexture = TextureManager.textureManager().loadTexture("HelpScreen2", "res/textures/screens/help02.png");
 	}
 
 	@Override
@@ -101,11 +94,6 @@ public class HelpScreen extends MenuScreen {
 	protected void handleOnClick() {
 		switch (mClickAction.consume()) {
 		case BUTTON_RESUME:
-			exitScreen();
-			break;
-
-		case BUTTON_NEXTPAGE:
-			mScreenManager.addScreen(new HelpScreen02(mScreenManager));
 			exitScreen();
 			break;
 		}

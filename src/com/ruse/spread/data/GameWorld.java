@@ -27,6 +27,7 @@ public class GameWorld extends BaseData {
 			}
 			return 0;
 		}
+		
 	}
 
 	public class PathingNode {
@@ -156,6 +157,8 @@ public class GameWorld extends BaseData {
 
 		mHQNode.setNodeType(WorldNode.NODE_TYPE_HQ);
 		mHQNode.tileIndex = mWorld.mHQTileIndex;
+		mHQNode.isConstructed = true;
+		mHQNode.nodeEnabled = true;
 
 		mHQNode.foodStore = mHQNode.storageCapacityFood;
 		mHQNode.populationStore = mHQNode.storageCapacityPopulation;

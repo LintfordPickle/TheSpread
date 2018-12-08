@@ -25,7 +25,7 @@ public class BaseGame extends LintfordCore {
 	public static final String GAME_FONT_LOCATION = "res/fonts/OxygenMono-Regular.ttf";
 
 	// final build flags
-	public static final boolean SHOW_INTRO = true;
+	public static final boolean SHOW_INTRO = false;
 	public static final boolean SHOW_FPS = false;
 
 	// ---------------------------------------------

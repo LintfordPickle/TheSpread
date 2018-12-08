@@ -22,7 +22,7 @@ public class World extends BaseData {
 
 	public static final int NUM_CITIES = 4;
 
-	public static final int TILE_SIZE = 32;
+	public static final int TILE_SIZE = 64;
 
 	// TODO: Move these into the WorldNode class
 	public static final int TILE_TYPE_SPAWNER = 0b00000001;
@@ -161,8 +161,6 @@ public class World extends BaseData {
 
 		mNoise = new ImprovedNoise(System.nanoTime());
 
-		createStartingArea();
-
 		randomiseHeights();
 		assignTiles();
 
@@ -170,9 +168,10 @@ public class World extends BaseData {
 		createMapRegions();
 
 		generateContours();
-		
+
 		// Get HQ Tileindex
 		mHQTileIndex = getHighestTile();
+		createStartingArea();
 
 	}
 
@@ -193,8 +192,7 @@ public class World extends BaseData {
 	}
 
 	private void createStartingArea() {
-
-		int lFarmTileIndex = getRandomWithinRange(mHQTileIndex, 5);
+		int lFarmTileIndex = getRandomWithinRange(mHQTileIndex, 4);
 		for (int i = 0; i < 5; i++) {
 			if (lFarmTileIndex != -1)
 				break;
@@ -203,9 +201,9 @@ public class World extends BaseData {
 		if (lFarmTileIndex != -1)
 			createNewRegion(World.TILE_TYPE_FARM, lFarmTileIndex);
 
-		int lMineTileIndex = getRandomWithinRange(mHQTileIndex, 5);
+		int lMineTileIndex = getRandomWithinRange(mHQTileIndex, 4);
 		for (int i = 0; i < 5; i++) {
-			if (lMineTileIndex != -1)
+			if (lMineTileIndex != -1 && lMineTileIndex != lFarmTileIndex)
 				break;
 		}
 
@@ -223,13 +221,13 @@ public class World extends BaseData {
 		final int lNumTries = 5;
 		for (int i = 0; i < lNumTries; i++) {
 
-			int lNewX = lTileX + RandomNumbers.random(0, pRange) - lHalfRange;
+			int lNewX = lTileX + RandomNumbers.random(0, pRange * 2) - lHalfRange;
 			if (lNewX < 0)
 				lNewX = 0;
 			if (lNewX >= WIDTH)
 				lNewX = WIDTH - 1;
 
-			int lNewY = lTileY + RandomNumbers.random(0, pRange) - lHalfRange;
+			int lNewY = lTileY + RandomNumbers.random(0, pRange * 2) - lHalfRange;
 			if (lNewY < 0)
 				lNewY = 0;
 			if (lNewY >= HEIGHT)
@@ -287,50 +285,50 @@ public class World extends BaseData {
 		if (lLowestIndex != -1)
 			createNewRegion(TILE_TYPE_SPAWNER, lLowestIndex);
 
-		lLowestPoint = 99;
-		lLowestIndex = -1;
-
-		// Left row
-		for (int i = 0; i < width * height; i += width) {
-			int lHeight = WorldTile.getTileHeight(ground[i]);
-			if (lHeight < lLowestPoint) {
-				lLowestPoint = lHeight;
-				lLowestIndex = i;
-			}
-		}
-
-		if (lLowestIndex != -1)
-			createNewRegion(TILE_TYPE_SPAWNER, lLowestIndex);
-
-		lLowestPoint = 99;
-		lLowestIndex = -1;
-
-		// bottom row
-		for (int i = width * height - width; i < width * height; i++) {
-			int lHeight = WorldTile.getTileHeight(ground[i]);
-			if (lHeight < lLowestPoint) {
-				lLowestPoint = lHeight;
-				lLowestIndex = i;
-			}
-		}
-
-		if (lLowestIndex != -1)
-			createNewRegion(TILE_TYPE_SPAWNER, lLowestIndex);
-
-		lLowestPoint = 99;
-		lLowestIndex = -1;
-
-		// right row
-		for (int i = width - 1; i < width * height; i += width) {
-			int lHeight = WorldTile.getTileHeight(ground[i]);
-			if (lHeight < lLowestPoint) {
-				lLowestPoint = lHeight;
-				lLowestIndex = i;
-			}
-		}
-
-		if (lLowestIndex != -1)
-			createNewRegion(TILE_TYPE_SPAWNER, lLowestIndex);
+//		lLowestPoint = 99;
+//		lLowestIndex = -1;
+//
+//		// Left row
+//		for (int i = 0; i < width * height; i += width) {
+//			int lHeight = WorldTile.getTileHeight(ground[i]);
+//			if (lHeight < lLowestPoint) {
+//				lLowestPoint = lHeight;
+//				lLowestIndex = i;
+//			}
+//		}
+//
+//		if (lLowestIndex != -1)
+//			createNewRegion(TILE_TYPE_SPAWNER, lLowestIndex);
+//
+//		lLowestPoint = 99;
+//		lLowestIndex = -1;
+//
+//		// bottom row
+//		for (int i = width * height - width; i < width * height; i++) {
+//			int lHeight = WorldTile.getTileHeight(ground[i]);
+//			if (lHeight < lLowestPoint) {
+//				lLowestPoint = lHeight;
+//				lLowestIndex = i;
+//			}
+//		}
+//
+//		if (lLowestIndex != -1)
+//			createNewRegion(TILE_TYPE_SPAWNER, lLowestIndex);
+//
+//		lLowestPoint = 99;
+//		lLowestIndex = -1;
+//
+//		// right row
+//		for (int i = width - 1; i < width * height; i += width) {
+//			int lHeight = WorldTile.getTileHeight(ground[i]);
+//			if (lHeight < lLowestPoint) {
+//				lLowestPoint = lHeight;
+//				lLowestIndex = i;
+//			}
+//		}
+//
+//		if (lLowestIndex != -1)
+//			createNewRegion(TILE_TYPE_SPAWNER, lLowestIndex);
 
 	}
 

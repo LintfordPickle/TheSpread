@@ -28,9 +28,9 @@ public class FarmRegion extends WorldRegion {
 		super(pUID, World.TILE_TYPE_FARM);
 
 		name = "Farm";
-		
+
 		storage = storageCapacity;
-		
+
 	}
 
 	// ---------------------------------------------
@@ -41,15 +41,17 @@ public class FarmRegion extends WorldRegion {
 	public void fillPackage(WorldPackage pPackgeToFill) {
 		pPackgeToFill.amount = 1;
 		pPackgeToFill.packageType = PACKAGETYPE.food;
-		
-		storage = 0;
+
+		storage--;
+		if (storage < 0)
+			storage = 0;
 
 	}
-	
+
 	@Override
 	public boolean canFillPackage(PACKAGETYPE pType, int pAmt) {
 		return pType == PACKAGETYPE.food && storage >= pAmt;
-		
+
 	}
 
 }

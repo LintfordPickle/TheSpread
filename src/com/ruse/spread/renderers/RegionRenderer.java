@@ -113,10 +113,10 @@ public class RegionRenderer extends BaseRenderer {
 				switch (lRegion.type()) {
 				case World.TILE_TYPE_SPAWNER:
 					float lDep = (lWorld.spreaderDepth[ti] / 2f);
-					lR = 0.04f;
-					lG = 0.07f;
-					lB = 0.22f;
-					lA = 1f;// lDep;
+					lR = 0.74f;
+					lG = 0.11f;
+					lB = 0.08f;
+					lA =  1f;//lDep;
 					timer[ti]--;
 					if (timer[ti] <= 0) {
 						variations[ti] = (int) (RandomNumbers.getRandomChance(2) ? RandomNumbers.random(0, 6) * 32 : 0f);

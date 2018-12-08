@@ -8,7 +8,7 @@ import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.graphics.particles.Particle;
 import net.lintford.library.core.graphics.particles.modifiers.IParticleModifier;
 
-public class ParticleBulletCollisionModifier implements IParticleModifier {
+public class ParticleMortarCollisionModifier implements IParticleModifier {
 
 	public static final boolean DEBUG_SHOT_NO_DAM = false;
 
@@ -23,7 +23,7 @@ public class ParticleBulletCollisionModifier implements IParticleModifier {
 	// Constructor
 	// --------------------------------------
 
-	public ParticleBulletCollisionModifier(ParticleController pParticleController, GameWorld pGameWorld) {
+	public ParticleMortarCollisionModifier(ParticleController pParticleController, GameWorld pGameWorld) {
 		mGameWorld = pGameWorld;
 		mGameParticleController = pParticleController;
 
@@ -48,6 +48,8 @@ public class ParticleBulletCollisionModifier implements IParticleModifier {
 		// check if bullets have collided with a region (spread)
 		if (DEBUG_SHOT_NO_DAM)
 			return;
+		
+		if(true) return;
 
 		int lTileIndex = mGameWorld.world().getTileFromWorldPosition(pParticle.x, pParticle.y);
 		int lRegionUID = mGameWorld.world().regions[lTileIndex];

@@ -33,6 +33,7 @@ public class RegionController extends BaseController {
 
 	private WorldController mWorldController;
 	private NodeController mNodeController;
+	private GameStateController mGameStateController;
 
 	private int[] visited;
 	List<Integer> lowestSet = new ArrayList<>();
@@ -61,7 +62,7 @@ public class RegionController extends BaseController {
 		super(pControllerManager, CONTROLLER_NAME, pGroupID);
 
 		mEnableSpread = true;
-		
+
 	}
 
 	// ---------------------------------------------
@@ -74,6 +75,7 @@ public class RegionController extends BaseController {
 
 		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mGroupID);
 		mNodeController = (NodeController) lControllerManager.getControllerByNameRequired(NodeController.CONTROLLER_NAME, mGroupID);
+		mGameStateController = (GameStateController) lControllerManager.getControllerByNameRequired(GameStateController.CONTROLLER_NAME, mGroupID);
 
 		visited = new int[mWorldController.gameWorld().world().ground.length];
 
@@ -164,13 +166,14 @@ public class RegionController extends BaseController {
 		// make sure in anyone tick we don't update down the same path multiple times
 		Arrays.fill(visited, 0x0);
 
+		if(true) return;
+		
 		if (step || (mEnableSpread && lSpreadRegion.timer > 200)) {
 			lSpreadRegion.timer = 0;
 
 			step = false;
 
-			// TODO: Stuff gets faster
-			final int lLevel = 1;
+			final int lLevel = mGameStateController.gameState().difficultyLevel;
 			for (int i = 0; i < lLevel; i++) {
 				spreadNextTile(pWorld, pRegion, false);
 
@@ -447,7 +450,8 @@ public class RegionController extends BaseController {
 			// spread too quickly
 
 			// Otherwise, increase the depth at the starting node
-			lSpreadDepth[pRegion.tiles().get(0)] += 1;
+			if (pRegion.tiles().size() > 0)
+				lSpreadDepth[pRegion.tiles().get(0)] += 1;
 
 		}
 

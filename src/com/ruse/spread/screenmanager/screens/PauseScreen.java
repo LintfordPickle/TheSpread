@@ -47,10 +47,6 @@ public class PauseScreen extends MenuScreen {
 	}
 
 	// --------------------------------------
-	// Core-Methods
-	// --------------------------------------
-
-	// --------------------------------------
 	// Methods
 	// --------------------------------------
 
@@ -65,7 +61,7 @@ public class PauseScreen extends MenuScreen {
 			break;
 
 		case BUTTON_EXIT:
-			LoadingScreen.load(mScreenManager, true, new MenuBackground(mScreenManager), new MainMenuScreen(mScreenManager));
+			LoadingScreen.load(mScreenManager, false, new MenuBackground(mScreenManager), new MainMenuScreen(mScreenManager));
 			break;
 		}
 	}

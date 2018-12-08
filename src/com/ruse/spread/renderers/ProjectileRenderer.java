@@ -113,8 +113,8 @@ public class ProjectileRenderer extends BaseRenderer {
 			final float lParticleHalfSize = 16 * lScale;
 
 			// lP.sx, lP.sy, lP.sw, lP.sh
-			pTextureBatch.draw(mParticlesTexture, 0, 0, 32, 32, lP.x - lParticleHalfSize, lP.y - lParticleHalfSize, lParticleHalfSize * 2, lParticleHalfSize * 2, -0.2f, lP.rot, lParticleHalfSize, lParticleHalfSize, 1f, lP.r, lP.g,
-					lP.b, lP.a);
+			pTextureBatch.draw(mParticlesTexture, lP.sx, lP.sy, lP.sw, lP.sh, lP.x - lParticleHalfSize, lP.y - lParticleHalfSize, lParticleHalfSize * 2, lParticleHalfSize * 2, -0.2f, lP.rot, lParticleHalfSize, lParticleHalfSize,
+					5f + lP.scale, lP.r, lP.g, lP.b, lP.a);
 
 		}
 	}

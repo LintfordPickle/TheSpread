@@ -2,11 +2,14 @@ package com.ruse.spread.controllers;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.ruse.spread.data.world.World;
+
 import net.lintford.library.controllers.BaseController;
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.camera.ICamera;
 import net.lintford.library.core.geometry.Rectangle;
+import net.lintford.library.core.maths.MathHelper;
 import net.lintford.library.data.entities.WorldEntity;
 
 public class CameraBoundController extends BaseController {
@@ -18,7 +21,7 @@ public class CameraBoundController extends BaseController {
 	public static final String CONTROLLER_NAME = "CameraBoundController";
 
 	private static final float CAMERA_MAN_MOVE_SPEED = 2.2f;
-	private static final float CAMERA_MAN_MOVE_SPEED_MAX = 1f;
+	private static final float CAMERA_MAN_MOVE_SPEED_MAX = 10f;
 
 	// ---------------------------------------------
 	// Variables
@@ -36,17 +39,15 @@ public class CameraBoundController extends BaseController {
 	private float mPositionVelocityX;
 	private float mPositionVelocityY;
 
+	private float mHomePositionX;
+	private float mHomePositionY;
+
 	// ---------------------------------------------
 	// Properties
 	// ---------------------------------------------
 
 	public Rectangle bounds() {
 		return mBounds;
-	}
-
-	public void setBounds(float pLeft, float pTop, float pRight, float pBottom) {
-		mBounds.set(pLeft, pTop, pRight, pBottom);
-
 	}
 
 	@Override
@@ -88,6 +89,13 @@ public class CameraBoundController extends BaseController {
 
 		final float speed = CAMERA_MAN_MOVE_SPEED;
 
+		if (pCore.input().keyDownTimed(GLFW.GLFW_KEY_SPACE)) {
+			mGameCamera.setPosition(mHomePositionX, mHomePositionY);
+			mPositionOffsetX = mHomePositionX;
+			mPositionOffsetY = mHomePositionY;
+
+		}
+
 		// Just listener for clicks - couldn't be easier !!?!
 		if (pCore.input().keyDown(GLFW.GLFW_KEY_A)) {
 			mPositionAccX += speed;
@@ -123,28 +131,31 @@ public class CameraBoundController extends BaseController {
 		mPositionAccX = 0;
 		mPositionAccY = 0;
 
+		// Limit velocity
+		mPositionVelocityX = MathHelper.clamp(mPositionVelocityX, -CAMERA_MAN_MOVE_SPEED_MAX, CAMERA_MAN_MOVE_SPEED_MAX);
+		mPositionVelocityY = MathHelper.clamp(mPositionVelocityY, -CAMERA_MAN_MOVE_SPEED_MAX, CAMERA_MAN_MOVE_SPEED_MAX);
+
 		mPositionOffsetX += mPositionVelocityX;
 		mPositionOffsetY += mPositionVelocityY;
 
-		// TODO: This is a hack, fix it
-		final float lBorder = 512;
-		if (mPositionOffsetX + lBorder < (mBounds.left()) / 2) {
-			mPositionOffsetX = (mBounds.left()) / 2 - lBorder;
+		final float lBorder = 0;
+		if (mPositionOffsetX + lBorder < (mBounds.left())) {
+			mPositionOffsetX = (mBounds.left()) - lBorder;
 			mPositionVelocityX = 0;
 		}
 
-		if (mPositionOffsetX - lBorder > (mBounds.right()) / 2) {
-			mPositionOffsetX = (mBounds.right()) / 2 + lBorder;
+		if (mPositionOffsetX - lBorder > (mBounds.right())) {
+			mPositionOffsetX = (mBounds.right()) + lBorder;
 			mPositionVelocityX = 0;
 		}
 
-		if (mPositionOffsetY + lBorder < (mBounds.top()) / 2) {
-			mPositionOffsetY = (mBounds.top()) / 2 - lBorder;
+		if (mPositionOffsetY + lBorder < (mBounds.top())) {
+			mPositionOffsetY = (mBounds.top()) - lBorder;
 			mPositionVelocityY = 0;
 		}
 
-		if (mPositionOffsetY - lBorder > (mBounds.bottom()) / 2) {
-			mPositionOffsetY = (mBounds.bottom()) / 2 + lBorder;
+		if (mPositionOffsetY - lBorder > (mBounds.bottom())) {
+			mPositionOffsetY = (mBounds.bottom()) + lBorder;
 			mPositionVelocityY = 0;
 		}
 
@@ -158,5 +169,20 @@ public class CameraBoundController extends BaseController {
 	// ---------------------------------------------
 	// Methods
 	// ---------------------------------------------
+
+	public void setup(float pPosX, float pPosY, float pLeft, float pTop, float pRight, float pBottom) {
+		if (mGameCamera != null) {
+			mHomePositionX = -pPosX - World.TILE_SIZE * 0.5f;
+			mHomePositionY = -pPosY - World.TILE_SIZE * 0.5f;
+
+			mGameCamera.setPosition(mHomePositionX, mHomePositionY);
+			mPositionOffsetX = mHomePositionX;
+			mPositionOffsetY = mHomePositionY;
+
+		}
+
+		mBounds.set(pLeft, pTop, pRight, pBottom);
+
+	}
 
 }

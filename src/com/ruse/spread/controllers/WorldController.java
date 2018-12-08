@@ -1,7 +1,5 @@
 package com.ruse.spread.controllers;
 
-import org.lwjgl.glfw.GLFW;
-
 import com.ruse.spread.data.GameWorld;
 
 import net.lintford.library.controllers.BaseController;
@@ -61,16 +59,6 @@ public class WorldController extends BaseController {
 	@Override
 	public void unload() {
 
-	}
-
-	@Override
-	public boolean handleInput(LintfordCore pCore) {
-		if (pCore.input().keyDownTimed(GLFW.GLFW_KEY_SPACE)) {
-			mGameWorld.generateNewWorld();
-
-		}
-
-		return super.handleInput(pCore);
 	}
 
 	@Override

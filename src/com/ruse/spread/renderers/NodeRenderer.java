@@ -41,6 +41,8 @@ public class NodeRenderer extends BaseRenderer {
 	private NodeController mNodeController;
 
 	private Texture mGameTexture;
+	private boolean mDrawPop;
+	private boolean mDrawHash;
 
 	// ---------------------------------------------
 	// Properties
@@ -186,16 +188,15 @@ public class NodeRenderer extends BaseRenderer {
 			float lNotConstructedModifier = lNode.isConstructed ? 1f : 0.5f;
 
 			lTextureBatch.draw(mGameTexture, xSrc, ySrc, 32, 32, lNode.mBounds, -0.2f, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier, lNotConstructedModifier);
-			lTextureBatch.draw(mGameTexture, 64, 160, 16, 16, lNode.mBounds.x+16, lNode.mBounds.y - 16, 16, 16, -0.2f, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier, lNotConstructedModifier);
+			lTextureBatch.draw(mGameTexture, 64, 160, 16, 16, lNode.mBounds.x + 16, lNode.mBounds.y - 16, 16, 16, -0.2f, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier,
+					lNotConstructedModifier);
 
-			if (true) // pop
+			mDrawPop = true;
+			if (mDrawPop) // pop count
 				lFont.draw("" + lNode.populationStore, lNode.mBounds.x, lNode.mBounds.y - 18, -0.2f, 1f, 0f, 0f, 1f, 1f);
 
-			if (false) // hash
+			if (mDrawHash) // hash
 				lFont.draw("" + lNode.hashCode(), lNode.mBounds.x, lNode.mBounds.y - 16, -0.2f, 1f, 0f, 0f, 1f, 1f);
-
-//			if (true)
-//				lFont.draw("" + lNode.id, lNode.mBounds.x, lNode.mBounds.y - 16, -0.2f, 1f, 0f, 0f, 1f, 1f);
 
 		}
 
@@ -225,10 +226,11 @@ public class NodeRenderer extends BaseRenderer {
 			boolean lIsActive = lEdge.node1.isConstructed && lEdge.node2.isConstructed;
 
 			float lR = lIsActive ? (80f / 255f) : 0.2f;
-			float lG = lIsActive ? (72f / 255f) : 0.2f;
-			float lB = lIsActive ? (36f / 255f) : 0.2f;
+			float lG = lIsActive ? (43f / 255f) : 0.2f;
+			float lB = lIsActive ? (26f / 255f) : 0.2f;
 
-			GL11.glLineWidth(3);
+			int lLineWidth = (int) (8f * pCore.gameCamera().getZoomFactor());
+			GL11.glLineWidth(lLineWidth);
 			final float lHalfTile = World.TILE_SIZE / 2f;
 			lLineBatch.a = 0.7f;
 			lLineBatch.draw(xOff + x1 + lHalfTile, yOff + y1 + lHalfTile, xOff + x2 + lHalfTile, yOff + y2 + lHalfTile, -0.3f, lR, lG, lB);

@@ -19,6 +19,7 @@ import com.ruse.spread.data.world.WorldRegion;
 import net.lintford.library.controllers.BaseController;
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
+import net.lintford.library.core.graphics.particles.Particle;
 import net.lintford.library.core.maths.RandomNumbers;
 import net.lintford.library.core.maths.Vector2f;
 
@@ -30,7 +31,7 @@ public class NodeController extends BaseController {
 
 	public static final String CONTROLLER_NAME = "NodeController";
 
-	public static final float PACKAGE_MOVEMENT_SPEED = 1f;
+	public static final float PACKAGE_MOVEMENT_SPEED = 1.5f;
 
 	// ---------------------------------------------
 	// Variables
@@ -38,7 +39,7 @@ public class NodeController extends BaseController {
 
 	private WorldController mWorldController;
 	private GameStateController mGameStateController;
-	private ProjectileController mProjectileController;
+	private ParticleController mProjectileController;
 
 	private List<WorldPackage> mPackageUpdateList = new ArrayList<>();
 	private List<WorldNode> mNodeUpdateList = new ArrayList<>();
@@ -88,7 +89,7 @@ public class NodeController extends BaseController {
 
 		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mGroupID);
 		mGameStateController = (GameStateController) lControllerManager.getControllerByNameRequired(GameStateController.CONTROLLER_NAME, mGroupID);
-		mProjectileController = (ProjectileController) lControllerManager.getControllerByNameRequired(ProjectileController.CONTROLLER_NAME, mGroupID);
+		mProjectileController = (ParticleController) lControllerManager.getControllerByNameRequired(ParticleController.CONTROLLER_NAME, mGroupID);
 
 	}
 
@@ -146,6 +147,9 @@ public class NodeController extends BaseController {
 	}
 
 	public void updateNode(LintfordCore pCore, GameWorld pGameWorld, WorldNode pNode) {
+		if (!pNode.nodeEnabled)
+			return;
+
 		pNode.requestPackageTimer += pCore.time().elapseGameTimeMilli();
 		pNode.sendPackageTimer += pCore.time().elapseGameTimeMilli();
 		pNode.shootTimer += pCore.time().elapseGameTimeMilli();
@@ -194,13 +198,11 @@ public class NodeController extends BaseController {
 		if (pNode.nodeType() == WorldNode.NODE_TYPE_PILLBOX || pNode.nodeType() == WorldNode.NODE_TYPE_TURRET || pNode.nodeType() == WorldNode.NODE_TYPE_MORTAR) {
 			if (pNode.isConstructed && pNode.populationStore > 0) {
 
-				// TODO: Reload
 				if (pNode.ammoStore < pNode.storageCapacityAmmo && pNode.metalStore > 0) {
-					if (pNode.ammoConvertTimer > 400) {
+					if (pNode.ammoConvertTimer > pNode.reloadCooldownTime) {
 						pNode.metalStore--;
 
-						pNode.ammoStore++;
-						pNode.ammoStore++;
+						pNode.ammoStore += pNode.ammoPerMetal;
 
 						pNode.ammoConvertTimer = 0;
 
@@ -208,35 +210,13 @@ public class NodeController extends BaseController {
 
 				}
 
-				if (pNode.ammoStore > 0 && pNode.shootTimer > 300) {
-					// 1. Check for spread within range
-					final int lRangeInTiles = 5;
-					int pTargetTile = getSpreadWithinRange(pNode.tileIndex, lRangeInTiles);
+				if (pNode.nodeType() == WorldNode.NODE_TYPE_PILLBOX || pNode.nodeType() == WorldNode.NODE_TYPE_TURRET) {
+					shootLOS(pNode, pGameWorld);
 
-					if (pTargetTile != -1) {
-						float xTar = pGameWorld.world().getWorldPositionX(pTargetTile) + World.TILE_SIZE * 0.5f;
-						float yTar = pGameWorld.world().getWorldPositionY(pTargetTile) + World.TILE_SIZE * 0.5f;
+				}
 
-						// 2. Shoot projectiles towards the threat
-						float xPos = pGameWorld.world().getWorldPositionX(pNode.tileIndex) + World.TILE_SIZE * 0.5f;
-						float yPos = pGameWorld.world().getWorldPositionY(pNode.tileIndex) + World.TILE_SIZE * 0.5f;
-
-						mTempVector.x = xTar - xPos;
-						mTempVector.y = yTar - yPos;
-						mTempVector.nor();
-						final float PROJ_SPEED = 400;
-
-						float lAngle = (float) (Math.atan2(mTempVector.y, mTempVector.x) + Math.toRadians(RandomNumbers.random(-5, 5)));
-
-						float lVelX = (float) Math.cos(lAngle) * PROJ_SPEED;
-						float lVelY = (float) Math.sin(lAngle) * PROJ_SPEED;
-
-						mProjectileController.shootProjectile("Turret", xPos, yPos, lVelX, lVelY, 1000);
-
-						pNode.ammoStore--;
-						pNode.shootTimer = 0;
-
-					}
+				if (pNode.nodeType() == WorldNode.NODE_TYPE_MORTAR) {
+					shootMortar(pNode, pGameWorld);
 
 				}
 
@@ -272,8 +252,8 @@ public class NodeController extends BaseController {
 				if (lTileIndex < 0 || lTileIndex > World.WIDTH * World.HEIGHT - 1)
 					continue;
 
-				float lTargetWorldX = mWorldController.gameWorld().world().getWorldPositionX(pTileCoord);
-				float lTargetWorldY = mWorldController.gameWorld().world().getWorldPositionY(pTileCoord);
+				float lTargetWorldX = mWorldController.gameWorld().world().getWorldPositionX(lTileIndex);
+				float lTargetWorldY = mWorldController.gameWorld().world().getWorldPositionY(lTileIndex);
 
 				if (lRegions[lTileIndex] > 0) {
 
@@ -308,7 +288,7 @@ public class NodeController extends BaseController {
 				int lRequestFood = howManyRequests(pNode, PACKAGETYPE.food);
 
 				if (lRequestFood < pNode.neededFood) {
-					lFulfillerHash = requestPackage(pGameWorld, pNode, PACKAGETYPE.food, lFulfillerHash);
+					lFulfillerHash = requestPackage(pGameWorld, pNode, PACKAGETYPE.food, false, lFulfillerHash);
 				}
 
 				lCanConstruct = false;
@@ -318,7 +298,7 @@ public class NodeController extends BaseController {
 				int lRequestMeetals = howManyRequests(pNode, PACKAGETYPE.metal);
 
 				if (lRequestMeetals < pNode.neededMetals) {
-					lFulfillerHash = requestPackage(pGameWorld, pNode, PACKAGETYPE.metal, lFulfillerHash);
+					lFulfillerHash = requestPackage(pGameWorld, pNode, PACKAGETYPE.metal, false, lFulfillerHash);
 				}
 
 				lCanConstruct = false;
@@ -328,7 +308,7 @@ public class NodeController extends BaseController {
 				int lRequestPop = howManyRequests(pNode, PACKAGETYPE.population);
 
 				if (lRequestPop < pNode.neededPop) {
-					requestPackage(pGameWorld, pNode, PACKAGETYPE.population, lFulfillerHash);
+					requestPackage(pGameWorld, pNode, PACKAGETYPE.population, false, lFulfillerHash);
 				}
 
 				lCanConstruct = false;
@@ -456,21 +436,21 @@ public class NodeController extends BaseController {
 
 			int lRequestedFood = howManyRequests(pNode, PACKAGETYPE.food);
 			if (!isOnFarmRegion && lRequestedFood + pNode.foodStore < pNode.storageCapacityFood) {
-				requestPackage(pGameWorld, pNode, PACKAGETYPE.food, 0x0);
+				requestPackage(pGameWorld, pNode, PACKAGETYPE.food, pNode.storage, 0x0);
 				pNode.requestPackageTimer = 0;
 
 			}
 
 			int lRequestedMetal = howManyRequests(pNode, PACKAGETYPE.metal);
 			if (!isOnMineRegion && lRequestedMetal + pNode.metalStore < pNode.storageCapacityMetal) {
-				requestPackage(pGameWorld, pNode, PACKAGETYPE.metal, 0x0);
+				requestPackage(pGameWorld, pNode, PACKAGETYPE.metal, pNode.storage, 0x0);
 				pNode.requestPackageTimer = 0;
 
 			}
 
 			int lRequestedPopulation = howManyRequests(pNode, PACKAGETYPE.population);
 			if (!isOnCityRegion && lRequestedPopulation + pNode.populationStore < pNode.storageCapacityPopulation) {
-				requestPackage(pGameWorld, pNode, PACKAGETYPE.population, 0x0);
+				requestPackage(pGameWorld, pNode, PACKAGETYPE.population, pNode.storage && pNode.populationStore > 0, 0x0);
 				pNode.requestPackageTimer = 0;
 
 			}
@@ -489,6 +469,12 @@ public class NodeController extends BaseController {
 
 			// Check if the package is at the destination
 			WorldNode lNextNode = pPackage.moveList.get(0);
+
+			if (lNextNode == null) { // node destroyed ?
+				pPackage.kill();
+				return;
+			}
+
 			if (pPackage.mBounds.intersectsAA(lNextNode.mBounds.centerX(), lNextNode.mBounds.centerY())) {
 				// We are at the destination
 				pPackage.moveList.remove(lNextNode);
@@ -522,6 +508,77 @@ public class NodeController extends BaseController {
 	// Methods
 	// ---------------------------------------------
 
+	public void shootLOS(WorldNode pNode, GameWorld pGameWorld) {
+		if (pNode.ammoStore > 0 && pNode.shootTimer > pNode.shootCooldownTime) {
+			// 1. Check for spread within range
+			int pTargetTile = getSpreadWithinRange(pNode.tileIndex, pNode.rangeInTiles);
+
+			if (pTargetTile != -1) {
+				float xTar = pGameWorld.world().getWorldPositionX(pTargetTile) + World.TILE_SIZE * 0.5f;
+				float yTar = pGameWorld.world().getWorldPositionY(pTargetTile) + World.TILE_SIZE * 0.5f;
+
+				// 2. Shoot projectiles towards the threat
+				float xPos = pGameWorld.world().getWorldPositionX(pNode.tileIndex) + World.TILE_SIZE * 0.5f;
+				float yPos = pGameWorld.world().getWorldPositionY(pNode.tileIndex) + World.TILE_SIZE * 0.5f;
+
+				mTempVector.x = xTar - xPos;
+				mTempVector.y = yTar - yPos;
+				mTempVector.nor();
+				final float PROJ_SPEED = 800;
+
+				float lAngle = (float) (Math.atan2(mTempVector.y, mTempVector.x) + Math.toRadians(RandomNumbers.random(-5, 5)));
+
+				float lVelX = (float) Math.cos(lAngle) * PROJ_SPEED;
+				float lVelY = (float) Math.sin(lAngle) * PROJ_SPEED;
+
+				mProjectileController.shootProjectile("Turret", xPos, yPos, lVelX, lVelY, 1000);
+
+				pNode.ammoStore--;
+				pNode.shootTimer = 0;
+
+			}
+
+		}
+	}
+
+	public void shootMortar(WorldNode pNode, GameWorld pGameWorld) {
+		if (pNode.ammoStore > 0 && pNode.shootTimer > pNode.shootCooldownTime) {
+			// 1. Check for spread within range
+			int pTargetTile = getSpreadWithinRange(pNode.tileIndex, pNode.rangeInTiles);
+
+			if (pTargetTile != -1) {
+				float xTar = pGameWorld.world().getWorldPositionX(pTargetTile) + World.TILE_SIZE * 0.5f;
+				float yTar = pGameWorld.world().getWorldPositionY(pTargetTile) + World.TILE_SIZE * 0.5f;
+
+				// 2. Shoot projectiles towards the threat
+				float xPos = pGameWorld.world().getWorldPositionX(pNode.tileIndex) + World.TILE_SIZE * 0.5f;
+				float yPos = pGameWorld.world().getWorldPositionY(pNode.tileIndex) + World.TILE_SIZE * 0.5f;
+
+				mTempVector.x = xTar - xPos;
+				mTempVector.y = yTar - yPos;
+				mTempVector.nor();
+				final float PROJ_SPEED = 200;
+
+				float lAngle = (float) (Math.atan2(mTempVector.y, mTempVector.x) + Math.toRadians(RandomNumbers.random(-5, 5)));
+
+				float lVelX = (float) Math.cos(lAngle) * PROJ_SPEED;
+				float lVelY = (float) Math.sin(lAngle) * PROJ_SPEED;
+
+				float lDist = Vector2f.distance(xPos, yPos, xTar, yTar);
+
+				Particle p = mProjectileController.shootProjectile("Mortar", xPos, yPos, lVelX, lVelY, lDist * 10);
+
+				if (p != null) {
+					pNode.ammoStore--;
+					pNode.shootTimer = 0;
+
+				}
+
+			}
+
+		}
+	}
+
 	public int howManyRequests(WorldNode pNode, PACKAGETYPE pPackageType) {
 		int lReturnAmount = 0;
 		final int lNumRequests = pNode.packageRequested.size();
@@ -537,7 +594,7 @@ public class NodeController extends BaseController {
 
 	}
 
-	private int requestPackage(GameWorld pGameWorld, WorldNode pNodeTo, PACKAGETYPE pPackageType, int pExcludeHash) {
+	private int requestPackage(GameWorld pGameWorld, WorldNode pNodeTo, PACKAGETYPE pPackageType, boolean pStorageRequest, int pExcludeHash) {
 		WorldPackage lPackage = pGameWorld.getFreePackage();
 
 		pGameWorld.resetPathNodes();
@@ -565,6 +622,9 @@ public class NodeController extends BaseController {
 
 			PathingNode lPathNode = pGameWorld.getPathNode(lNextNode);
 
+			if (lPathNode == lOurPathingNode)
+				continue;
+
 			if (lPathNode == null)
 				return -1;
 
@@ -580,15 +640,23 @@ public class NodeController extends BaseController {
 		PathingNode lPathNode = pathPriorityQueue.poll();
 		while (!lFoundEnd && lPathNode != null) {
 
+			// If it is a storage request and we are a storage unit, then don't move the resources around
+			boolean fulfilStorageRequest = !(pStorageRequest && lPathNode.node.storage);
+
 			// Check the node for stored packages
 			int lFulfillerHash = lPathNode.node.hashCode();
-			if (lFulfillerHash != pExcludeHash) {
+			if (fulfilStorageRequest && lFulfillerHash != pExcludeHash) {
 				boolean lFound = false;
 
-				if (lPathNode.node.provider && lPathNode.node.hasStoresEnough(pPackageType, 1, true)) {
+				if (lPathNode.node.nodeEnabled && lPathNode.node.provider && lPathNode.node.hasStoresEnough(pPackageType, 1, true)) {
 					lPackage.amount = 1;
 					lPackage.packageType = pPackageType;
 
+					if(pPackageType == PACKAGETYPE.population) {
+						System.out.printf("Sending food (Node) from %d (%d) to %d (%d)\n", lPathNode.node.hashCode(), lPathNode.node.nodeType(), pNodeTo.hashCode(), pNodeTo.nodeType());
+						
+					}
+					
 					lFound = true;
 
 				} else {
@@ -597,6 +665,11 @@ public class NodeController extends BaseController {
 					if (lRegion != null && lRegion.canFillPackage(pPackageType, 1)) {
 						lRegion.fillPackage(lPackage);
 
+						if(pPackageType == PACKAGETYPE.population) {
+							System.out.printf("Sending food (Region) from %d (%d) to %d (%d)", lPathNode.node.hashCode(), lPathNode.node.nodeType(), pNodeTo.hashCode(), pNodeTo.nodeType());
+							
+						}
+						
 						lFound = true;
 
 					}
@@ -619,9 +692,7 @@ public class NodeController extends BaseController {
 					float yPos = pGameWorld.world().getWorldPositionY(lN.node.tileIndex);
 					lPackage.mBounds.setCenterPosition(xPos + World.TILE_SIZE * 0.5f, yPos + World.TILE_SIZE * 0.5f);
 
-					// System.out.println("Route: (" + pPackageType.toString() + ")");
 					while (lN != null) {
-						// System.out.println(" " + lN.node.hashCode());
 						lPackage.moveList.add(lN.node);
 
 						lN = lN.prevNode;
@@ -667,6 +738,7 @@ public class NodeController extends BaseController {
 
 	}
 
+	// TODO: Incomplete sendPackage function. used when selling buildings to redistribute the items
 	private int sendPackage(GameWorld pGameWorld, WorldNode pNodeFrom, WorldNode pNodeTo, PACKAGETYPE pPackageType, int pExcludeHash) {
 		WorldPackage lPackage = pGameWorld.getFreePackage();
 
@@ -798,42 +870,15 @@ public class NodeController extends BaseController {
 	}
 
 	public boolean addNode(WorldNode pNode) {
-		GameWorld lWorld = mWorldController.gameWorld();
+		final GameWorld lWorld = mWorldController.gameWorld();
+
+		pNode.nodeEnabled = true;
 
 		// TODO: Check if the node can really be placed here
 
-		float lNodePosX = (pNode.tileIndex % World.WIDTH) * World.TILE_SIZE;
-		float lNodePosY = (pNode.tileIndex / World.WIDTH) * World.TILE_SIZE;
-
-		// Check the proximity to other nodes and add edges
-		final int lNodeCount = lWorld.nodes().size();
-		for (int i = 0; i < lNodeCount; i++) {
-			WorldNode lOtherNode = lWorld.nodes().get(i);
-
-			float lONodeX = (lOtherNode.tileIndex % World.WIDTH) * World.TILE_SIZE;
-			float lONodeY = (lOtherNode.tileIndex / World.WIDTH) * World.TILE_SIZE;
-
-			float lMaxDist = Math.max(pNode.maxDistanceBetweenNodes, lOtherNode.maxDistanceBetweenNodes);
-
-			float dist = Vector2f.distance(lNodePosX, lNodePosY, lONodeX, lONodeY);
-			if (dist < lMaxDist) {
-				// Add an edge
-				WorldEdge lNewEdge = new WorldEdge();
-
-				lNewEdge.node1 = pNode;
-				lNewEdge.node2 = lOtherNode;
-				lNewEdge.dist = Vector2f.distance(lNodePosX, lNodePosY, lONodeX, lONodeY);
-
-				lWorld.edges().add(lNewEdge);
-
-				lOtherNode.edges.add(lNewEdge);
-				pNode.edges.add(lNewEdge);
-
-			}
-
-		}
-
 		lWorld.addNewWorldNode(pNode);
+
+		connectNodes(pNode);
 
 		return true;
 
@@ -890,8 +935,161 @@ public class NodeController extends BaseController {
 
 	}
 
+	public void reconnectNodes(WorldNode pNode) {
+		final int lNumEdges = pNode.edges.size();
+		for (int i = 0; i < lNumEdges; i++) {
+			WorldEdge lEdge = pNode.edges.get(i);
+			lEdge.node1 = null;
+			lEdge.node2 = null;
+			lEdge.kill();
+
+		}
+
+		pNode.edges.clear();
+
+		// Rebuild the graph around this node
+		connectNodes(pNode);
+
+	}
+
+	public void connectNodes(WorldNode pNode) {
+		final GameWorld lWorld = mWorldController.gameWorld();
+
+		float lNodePosX = (pNode.tileIndex % World.WIDTH) * World.TILE_SIZE;
+		float lNodePosY = (pNode.tileIndex / World.WIDTH) * World.TILE_SIZE;
+
+		List<WorldNode> lNeighbouringNodes = new ArrayList<>();
+
+		// Check the proximity to other nodes and add edges
+		final int lNodeCount = lWorld.nodes().size();
+		for (int i = 0; i < lNodeCount; i++) {
+			WorldNode lOtherNode = lWorld.nodes().get(i);
+
+			float lONodeX = (lOtherNode.tileIndex % World.WIDTH) * World.TILE_SIZE;
+			float lONodeY = (lOtherNode.tileIndex / World.WIDTH) * World.TILE_SIZE;
+
+			float lMaxDist = Math.max(pNode.maxDistanceBetweenNodes, lOtherNode.maxDistanceBetweenNodes);
+
+			// Check the direct distance to the nodes
+			float dist = Vector2f.distance(lNodePosX, lNodePosY, lONodeX, lONodeY);
+			if (dist < lMaxDist) {
+				// Add an edge
+				WorldEdge lNewEdge = new WorldEdge();
+
+				lNewEdge.node1 = pNode;
+				lNewEdge.node2 = lOtherNode;
+				lNewEdge.dist = Vector2f.distance(lNodePosX, lNodePosY, lONodeX, lONodeY);
+
+				lWorld.edges().add(lNewEdge);
+
+				lOtherNode.edges.add(lNewEdge);
+				pNode.edges.add(lNewEdge);
+
+				lNeighbouringNodes.add(lOtherNode);
+
+			}
+
+		}
+
+		// After we have created all the nodes, loop through all the neighbouring nodes and measure the distance.
+		// Then try to get the distance via the graph edges - for any where the graph is faster, then
+
+		final int lTotNodeCount = lWorld.nodes().size();
+		for (int i = 0; i < lTotNodeCount; i++) {
+			WorldNode lOtherNode = lWorld.nodes().get(i);
+
+			float lONodeX = (lOtherNode.tileIndex % World.WIDTH) * World.TILE_SIZE;
+			float lONodeY = (lOtherNode.tileIndex / World.WIDTH) * World.TILE_SIZE;
+			float lDirectDistance = Vector2f.distance(lNodePosX, lNodePosY, lONodeX, lONodeY);
+
+			float lGraphDistance = distAlongGraph(lWorld, pNode, lOtherNode);
+
+			if (lGraphDistance != -1 && lDirectDistance > lGraphDistance) {
+				// TODO: figure out (using the edge normal) which edges are not required and remove them
+
+			}
+
+		}
+
+	}
+
 	public boolean checkViability(WorldNode pNode) {
 		return true;
+
+	}
+
+	private float distAlongGraph(GameWorld pGameWorld, WorldNode pNodeFrom, WorldNode pNodeTo) {
+		pGameWorld.resetPathNodes();
+		Queue<PathingNode> pathPriorityQueue = pGameWorld.pathPriorityQueue;
+		pathPriorityQueue.clear();
+
+		boolean lFoundEnd = false;
+
+		PathingNode lOurPathingNode = pGameWorld.getPathNode(pNodeTo);
+		if (lOurPathingNode == null) {
+			return -1;
+
+		}
+
+		lOurPathingNode.visited = true;
+		lOurPathingNode.aggCost = 0; // start node
+
+		// 1. Add all neighbouring nodes to the priorityQueue
+		int lNeighbourSize = pNodeTo.edges.size();
+		for (int i = 0; i < lNeighbourSize; i++) {
+			WorldEdge lEdge = pNodeTo.edges.get(i);
+			WorldNode lNextNode = lEdge.getOtherNode(pNodeTo);
+
+			PathingNode lPathNode = pGameWorld.getPathNode(lNextNode);
+
+			if (lPathNode == null)
+				return -1;
+
+			lPathNode.aggCost = lEdge.dist;
+			lPathNode.prevNode = lOurPathingNode;
+			lPathNode.visited = true;
+
+			pathPriorityQueue.add(lPathNode);
+
+		}
+
+		PathingNode lPathNode = pathPriorityQueue.poll();
+		while (!lFoundEnd && lPathNode != null) {
+			if (lPathNode.node == pNodeFrom) { // Back at teh start ?
+				return lPathNode.aggCost;
+			}
+
+			// Add the next nodes neighbours to the priorityQueue
+			lNeighbourSize = lPathNode.node.edges.size();
+			for (int i = 0; i < lNeighbourSize; i++) {
+				WorldEdge lEdge = lPathNode.node.edges.get(i);
+				WorldNode lNextNode = lEdge.getOtherNode(lPathNode.node);
+
+				PathingNode lNextPathNode = pGameWorld.getPathNode(lNextNode);
+
+				float lPathAggCost = lPathNode.aggCost + lEdge.dist;
+
+				if (lPathAggCost < lNextPathNode.aggCost) {
+					lNextPathNode.aggCost = lPathAggCost;
+					lNextPathNode.prevNode = lPathNode;
+				}
+
+				int lType = lPathNode.node.nodeType();
+				boolean isLogisticalNode = (lType != WorldNode.NODE_TYPE_PILLBOX && lType != WorldNode.NODE_TYPE_TURRET && lType != WorldNode.NODE_TYPE_MORTAR);
+
+				// Only visit each node once
+				if (isLogisticalNode && !lNextPathNode.visited && lNextPathNode.node.isConstructed) {
+					pathPriorityQueue.add(lNextPathNode);
+					lNextPathNode.visited = true;
+
+				}
+
+			}
+
+			lPathNode = pathPriorityQueue.poll();
+		}
+
+		return -1;
 
 	}
 

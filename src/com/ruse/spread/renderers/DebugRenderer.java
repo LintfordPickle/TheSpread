@@ -134,11 +134,11 @@ public class DebugRenderer extends BaseRenderer {
 
 		FontUnit lFont = mRendererManager.textFont();
 
-		final boolean lDrawGroundHeight = true;
-		final boolean lDrawSpreadHeight = true;
+		final boolean lDrawGroundHeight = false;
+		final boolean lDrawSpreadHeight = false;
 		final boolean lDrawHealth = false;
 		final boolean lDrawRegionUID = false;
-		final boolean lDrawTileIndex = false;
+		final boolean lDrawTileIndex = true;
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {

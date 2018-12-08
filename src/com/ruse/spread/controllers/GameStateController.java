@@ -1,8 +1,12 @@
 package com.ruse.spread.controllers;
 
+import org.lwjgl.glfw.GLFW;
+
 import com.ruse.spread.data.GameState;
+import com.ruse.spread.data.world.World;
 
 import net.lintford.library.controllers.BaseController;
+import net.lintford.library.controllers.camera.CameraController;
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
 
@@ -20,6 +24,8 @@ public class GameStateController extends BaseController {
 
 	private GameState mGameState;
 	private WorldController mWorldController;
+	private CameraController mCameraController;
+	private CameraBoundController mCameraBoundController;
 
 	private boolean mIsGameEnded;
 
@@ -56,7 +62,19 @@ public class GameStateController extends BaseController {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
 		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mGroupID);
+		mCameraController = (CameraController) lControllerManager.getControllerByNameRequired(CameraController.CONTROLLER_NAME, LintfordCore.CORE_ID);
+		mCameraBoundController = (CameraBoundController) lControllerManager.getControllerByNameRequired(CameraBoundController.CONTROLLER_NAME, mGroupID);
 
+	}
+
+	@Override
+	public boolean handleInput(LintfordCore pCore) {
+		if (pCore.input().keyDownTimed(GLFW.GLFW_KEY_R)) {
+			mIsGameEnded = true;
+
+		}
+
+		return super.handleInput(pCore);
 	}
 
 	@Override
@@ -67,6 +85,19 @@ public class GameStateController extends BaseController {
 	@Override
 	public void update(LintfordCore pCore) {
 		super.update(pCore);
+
+		if (mGameState.difficultyLevel < mGameState.difficultyLevelMax) {
+			mGameState.difficultyTimer += pCore.time().elapseGameTimeMilli();
+
+			if (mGameState.difficultyTimer > mGameState.difficultyTime) {
+				mGameState.difficultyLevel++;
+				System.out.println("difficulty increased to " + mGameState.difficultyLevel);
+
+				mGameState.difficultyTimer = 0;
+
+			}
+
+		}
 
 		// Check for game won
 		if (!mWorldController.gameWorld().world().checkStillSpreader()) {
@@ -81,21 +112,26 @@ public class GameStateController extends BaseController {
 		if (mIsGameEnded) {
 			startNewGame();
 
-			mWorldController.gameWorld().generateNewWorld();
-
 		}
 
 	}
-
-	// ---------------------------------------------
-	// Core-Methods
-	// ---------------------------------------------
 
 	// ---------------------------------------------
 	// Methods
 	// ---------------------------------------------
 
 	public void startNewGame() {
+		mWorldController.gameWorld().generateNewWorld();
+		mGameState.startNewGame();
+
+		final World lWorld = mWorldController.gameWorld().world();
+		final int lHQNodeTileIndex = mWorldController.gameWorld().HQNode().tileIndex;
+
+		float StartX = lWorld.getWorldPositionX(lHQNodeTileIndex);
+		float StartY = lWorld.getWorldPositionY(lHQNodeTileIndex);
+
+		mCameraBoundController.setup(StartX, StartY, -lWorld.width / 2f * World.TILE_SIZE, -lWorld.height / 2f * World.TILE_SIZE, lWorld.width * World.TILE_SIZE, lWorld.height * World.TILE_SIZE);
+
 		mIsGameEnded = false;
 	}
 

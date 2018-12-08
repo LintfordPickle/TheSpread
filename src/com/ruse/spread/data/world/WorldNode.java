@@ -57,11 +57,19 @@ public class WorldNode extends PooledInstanceData {
 	public int metalStore;
 	public int ammoStore;
 
+	// Military
+	public int ammoPerMetal; // number of shots gained per metal resource
+	public int shotDamage; // damage per shot
+	public int rangeInTiles; // The distance the military units can shoot
+	public int shootCooldownTime; // Time between shots
+	public int reloadCooldownTime; // Time between converting metals to bullets
+
 	public int maintainMinimumPop;
 
 	public int health;
 
 	public boolean provider;
+	public boolean storage;
 	public boolean isUnderCaution;
 
 	public List<WorldEdge> edges = new ArrayList<>();
@@ -73,6 +81,8 @@ public class WorldNode extends PooledInstanceData {
 	public float shootTimer;
 	public float nodeWorkerTimer;
 	public float hqGenerateTimer;
+
+	public boolean nodeEnabled;
 
 	// ---------------------------------------------
 	// Properties
@@ -108,10 +118,13 @@ public class WorldNode extends PooledInstanceData {
 		neededPop = 0;
 		neededFood = 0;
 		neededMetals = 0;
+
+		nodeEnabled = false;
 	}
 
 	public void setupNewNode(int pMetalNeeded, int pFoodNeeded, int pPopNeeded) {
 		isConstructed = false;
+		nodeEnabled = true;
 		neededMetals = pMetalNeeded;
 		neededFood = pFoodNeeded;
 		neededPop = pPopNeeded;
@@ -129,6 +142,8 @@ public class WorldNode extends PooledInstanceData {
 				return true;
 			}
 
+			break;
+
 		case metal:
 			if (metalStore >= pAmt) {
 				if (pReduceAmt)
@@ -137,6 +152,8 @@ public class WorldNode extends PooledInstanceData {
 					metalStore = 0;
 				return true;
 			}
+
+			break;
 
 		case population:
 			if (populationStore >= pAmt && populationStore > maintainMinimumPop) {
@@ -147,6 +164,9 @@ public class WorldNode extends PooledInstanceData {
 					populationStore = 0;
 				return true;
 			}
+
+			break;
+
 		default:
 		}
 
@@ -201,13 +221,15 @@ public class WorldNode extends PooledInstanceData {
 		switch (nodeType) {
 		case NODE_TYPE_HQ:
 			name = "HQ";
-			maxDistanceBetweenNodes = 150;
+			maxDistanceBetweenNodes = World.TILE_SIZE * 3;
 			storageCapacityFood = 30;
 			storageCapacityMetal = 30;
 			storageCapacityPopulation = 30;
 			maintainMinimumPop = 2;
 			storageCapacityAmmo = 0;
+			ammoPerMetal = 0;
 			provider = true;
+			storage = true;
 			health = MAX_HEALTH;
 
 			neededPop = 0;
@@ -217,13 +239,15 @@ public class WorldNode extends PooledInstanceData {
 
 		case NODE_TYPE_NORMAL:
 			name = "Node";
-			maxDistanceBetweenNodes = 120;
+			maxDistanceBetweenNodes = World.TILE_SIZE * 3;
 			storageCapacityFood = 2;
 			storageCapacityMetal = 2;
 			storageCapacityPopulation = 2;
 			maintainMinimumPop = 1;
 			storageCapacityAmmo = 0;
+			ammoPerMetal = 0;
 			provider = false;
+			storage = false;
 			health = MAX_HEALTH;
 
 			neededPop = 0;
@@ -233,14 +257,16 @@ public class WorldNode extends PooledInstanceData {
 
 		case NODE_TYPE_LONG:
 			name = "Long Node";
-			maxDistanceBetweenNodes = 190;
+			maxDistanceBetweenNodes = World.TILE_SIZE * 5;
 			storageCapacityFood = 2;
 			storageCapacityMetal = 2;
 			storageCapacityPopulation = 2;
 			maintainMinimumPop = 1;
 			storageCapacityAmmo = 0;
 			storageCapacityAmmo = 0;
+			ammoPerMetal = 0;
 			provider = false;
+			storage = false;
 			health = MAX_HEALTH;
 
 			neededPop = 0;
@@ -250,13 +276,15 @@ public class WorldNode extends PooledInstanceData {
 
 		case NODE_TYPE_STORAGE:
 			name = "Storage Node";
-			maxDistanceBetweenNodes = 120;
-			storageCapacityFood = 15;
-			storageCapacityMetal = 15;
-			storageCapacityPopulation = 5;
+			maxDistanceBetweenNodes = World.TILE_SIZE * 3;
+			storageCapacityFood = 20;
+			storageCapacityMetal = 20;
+			storageCapacityPopulation = 7;
 			maintainMinimumPop = 2;
 			storageCapacityAmmo = 0;
-			provider = false;
+			ammoPerMetal = 0;
+			provider = true;
+			storage = true;
 			health = MAX_HEALTH;
 
 			neededPop = 0;
@@ -266,13 +294,19 @@ public class WorldNode extends PooledInstanceData {
 
 		case NODE_TYPE_PILLBOX:
 			name = "Pillbox";
-			maxDistanceBetweenNodes = 120;
+			maxDistanceBetweenNodes = World.TILE_SIZE * 3;
 			storageCapacityFood = 5;
 			storageCapacityMetal = 5;
 			storageCapacityPopulation = 5;
 			maintainMinimumPop = 5;
 			storageCapacityAmmo = 5;
+			ammoPerMetal = 15;
+			rangeInTiles = 5;
+			shootCooldownTime = 65;
+			reloadCooldownTime = 400;
+			shotDamage = 50;
 			provider = false;
+			storage = false;
 			health = MAX_HEALTH;
 
 			neededPop = 0;
@@ -282,13 +316,19 @@ public class WorldNode extends PooledInstanceData {
 
 		case NODE_TYPE_TURRET:
 			name = "Turret";
-			maxDistanceBetweenNodes = 120;
+			maxDistanceBetweenNodes = World.TILE_SIZE * 3;
 			storageCapacityFood = 0;
 			storageCapacityMetal = 10;
 			storageCapacityPopulation = 4;
 			maintainMinimumPop = 4;
 			storageCapacityAmmo = 5;
+			ammoPerMetal = 7;
+			rangeInTiles = 7;
+			shootCooldownTime = 105;
+			reloadCooldownTime = 400;
+			shotDamage = 90;
 			provider = false;
+			storage = false;
 			health = MAX_HEALTH;
 
 			neededPop = 0;
@@ -298,13 +338,19 @@ public class WorldNode extends PooledInstanceData {
 
 		case NODE_TYPE_MORTAR:
 			name = "Mortar";
-			maxDistanceBetweenNodes = 80;
+			maxDistanceBetweenNodes = World.TILE_SIZE * 3;
 			storageCapacityFood = 0;
 			storageCapacityMetal = 10;
 			storageCapacityPopulation = 6;
 			maintainMinimumPop = 6;
 			storageCapacityAmmo = 5;
+			ammoPerMetal = 4;
+			rangeInTiles = 11;
+			shootCooldownTime = 1500;
+			reloadCooldownTime = 800;
+			shotDamage = 250;
 			provider = false;
+			storage = false;
 			health = MAX_HEALTH;
 
 			neededPop = 0;

@@ -45,6 +45,10 @@ public class CityRegion extends WorldRegion {
 		pPackgeToFill.amount = 1;
 		pPackgeToFill.packageType = PACKAGETYPE.population;
 
+		popStorage--;
+		if (popStorage < 0)
+			popStorage = 0;
+
 	}
 
 	@Override

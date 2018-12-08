@@ -8,13 +8,12 @@ import com.ruse.spread.controllers.GameStateController;
 import com.ruse.spread.controllers.MouseController;
 import com.ruse.spread.controllers.NodeController;
 import com.ruse.spread.controllers.PackageController;
-import com.ruse.spread.controllers.ProjectileController;
+import com.ruse.spread.controllers.ParticleController;
 import com.ruse.spread.controllers.RegionController;
 import com.ruse.spread.controllers.RoadController;
 import com.ruse.spread.controllers.SpreadController;
 import com.ruse.spread.controllers.WorldController;
 import com.ruse.spread.data.GameWorld;
-import com.ruse.spread.data.world.World;
 import com.ruse.spread.renderers.DebugRenderer;
 import com.ruse.spread.renderers.HUDRenderer;
 import com.ruse.spread.renderers.MouseRenderer;
@@ -52,7 +51,7 @@ public class GameScreen extends BaseGameScreen {
 	SpreadController mSpreadController;
 	GameStateController mGameStateController;
 	NodeController mNodeController;
-	ProjectileController mProjectileController;
+	ParticleController mProjectileController;
 
 	CameraZoomController mCameraZoomController;
 	CameraBoundController mCameraBoundController;
@@ -95,7 +94,7 @@ public class GameScreen extends BaseGameScreen {
 		mRoadController = new RoadController(lControllerManager, entityGroupID);
 		mSpreadController = new SpreadController(lControllerManager, entityGroupID);
 		mNodeController = new NodeController(lControllerManager, entityGroupID);
-		mProjectileController = new ProjectileController(lControllerManager, mWorld.projectileManager(), entityGroupID);
+		mProjectileController = new ParticleController(lControllerManager, mWorld.projectileManager(), entityGroupID);
 
 		mGameStateController = new GameStateController(lControllerManager, mWorld.gameState(), entityGroupID);
 
@@ -121,11 +120,10 @@ public class GameScreen extends BaseGameScreen {
 		ControllerManager lControllerManager = mScreenManager.core().controllerManager();
 
 		mCameraZoomController = new CameraZoomController(lControllerManager, (Camera) mScreenManager.core().gameCamera(), entityGroupID);
-		mCameraZoomController.setZoomConstraints(1f, 1f);
+		mCameraZoomController.setZoomConstraints(0.6f, 1f);
 		mCameraZoomController.initialise(mScreenManager.core());
 
 		mCameraBoundController = new CameraBoundController(lControllerManager, (Camera) mScreenManager.core().gameCamera(), null, entityGroupID);
-		mCameraBoundController.setBounds(-World.WIDTH / 2f * World.TILE_SIZE, -World.HEIGHT / 2f * World.TILE_SIZE, World.WIDTH * World.TILE_SIZE, World.HEIGHT * World.TILE_SIZE);
 		mCameraBoundController.initialise(mScreenManager.core());
 
 		mWorldController.initialise(mScreenManager.core());
@@ -148,7 +146,7 @@ public class GameScreen extends BaseGameScreen {
 		mMouseRenderer.initialise(mScreenManager.core());
 		mDebugRenderer.initialise(mScreenManager.core());
 
-		mWorld.generateNewWorld();
+		mGameStateController.startNewGame();
 
 	}
 
@@ -198,7 +196,7 @@ public class GameScreen extends BaseGameScreen {
 
 		TextureBatch lTextureBatch = mRendererManager.uiTextureBatch();
 		lTextureBatch.begin(pCore.HUD());
-		lTextureBatch.draw(mBackgroundTexture, lParallaxX, lParallaxY, 640, 640, -320, -320, 640, 640, -0.8f, 1f, 1f, 1f, 1f);
+		lTextureBatch.draw(mBackgroundTexture, lParallaxX, lParallaxY, 320, 320, -320, -320, 640, 640, -0.8f, 1f, 1f, 1f, 1f);
 		lTextureBatch.end();
 
 		GL11.glEnable(GL11.GL_DEPTH_TEST);

@@ -26,7 +26,7 @@ public class MineRegion extends WorldRegion {
 
 	public MineRegion(int pUID) {
 		super(pUID, World.TILE_TYPE_MINE);
-		
+
 		name = "Mine";
 
 	}
@@ -37,6 +37,10 @@ public class MineRegion extends WorldRegion {
 
 	@Override
 	public void fillPackage(WorldPackage pPackgeToFill) {
+		storage--;
+		if (storage < 0)
+			return;
+		
 		pPackgeToFill.amount = 1;
 		pPackgeToFill.packageType = PACKAGETYPE.metal;
 
