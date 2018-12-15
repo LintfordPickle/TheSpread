@@ -1,4 +1,4 @@
-package com.ruse.spread.screenmanager.screens;
+package com.ruse.spread.screens;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
@@ -21,6 +21,7 @@ import com.ruse.spread.renderers.NodeRenderer;
 import com.ruse.spread.renderers.ProjectileRenderer;
 import com.ruse.spread.renderers.RegionRenderer;
 import com.ruse.spread.renderers.RoadRenderer;
+import com.ruse.spread.renderers.SpreadRenderer;
 import com.ruse.spread.renderers.WorldRenderer;
 
 import net.lintford.library.controllers.camera.CameraZoomController;
@@ -57,13 +58,14 @@ public class GameScreen extends BaseGameScreen {
 	CameraBoundController mCameraBoundController;
 
 	WorldRenderer mWorldRenderer;
-	RegionRenderer mSpreadRenderer;
+	RegionRenderer mRegionRenderer;
 	RoadRenderer mRoadRenderer;
 	ProjectileRenderer mProjectileRenderer;
 	NodeRenderer mObjectRenderer;
 	HUDRenderer mHUDRenderer;
 	DebugRenderer mDebugRenderer;
 	MouseRenderer mMouseRenderer;
+	SpreadRenderer mSpreadRenderer;
 
 	Texture mBackgroundTexture;
 
@@ -101,11 +103,12 @@ public class GameScreen extends BaseGameScreen {
 		mWorldRenderer = new WorldRenderer(mRendererManager, entityGroupID);
 		mObjectRenderer = new NodeRenderer(mRendererManager, entityGroupID);
 		mRoadRenderer = new RoadRenderer(mRendererManager, entityGroupID);
-		mSpreadRenderer = new RegionRenderer(mRendererManager, entityGroupID);
+		mRegionRenderer = new RegionRenderer(mRendererManager, entityGroupID);
 		mProjectileRenderer = new ProjectileRenderer(mRendererManager, mWorld, entityGroupID);
 		mHUDRenderer = new HUDRenderer(mRendererManager, entityGroupID);
 		mMouseRenderer = new MouseRenderer(mRendererManager, entityGroupID);
 		mDebugRenderer = new DebugRenderer(mRendererManager, entityGroupID);
+		mSpreadRenderer = new SpreadRenderer(mRendererManager, entityGroupID);
 
 	}
 
@@ -120,7 +123,7 @@ public class GameScreen extends BaseGameScreen {
 		ControllerManager lControllerManager = mScreenManager.core().controllerManager();
 
 		mCameraZoomController = new CameraZoomController(lControllerManager, (Camera) mScreenManager.core().gameCamera(), entityGroupID);
-		mCameraZoomController.setZoomConstraints(0.6f, 1f);
+		mCameraZoomController.setZoomConstraints(0.7f, 1.7f);
 		mCameraZoomController.initialise(mScreenManager.core());
 
 		mCameraBoundController = new CameraBoundController(lControllerManager, (Camera) mScreenManager.core().gameCamera(), null, entityGroupID);
@@ -140,13 +143,15 @@ public class GameScreen extends BaseGameScreen {
 		mWorldRenderer.initialise(mScreenManager.core());
 		mObjectRenderer.initialise(mScreenManager.core());
 		mRoadRenderer.initialise(mScreenManager.core());
-		mSpreadRenderer.initialise(mScreenManager.core());
+		mRegionRenderer.initialise(mScreenManager.core());
 		mProjectileRenderer.initialise(mScreenManager.core());
 		mHUDRenderer.initialise(mScreenManager.core());
 		mMouseRenderer.initialise(mScreenManager.core());
 		mDebugRenderer.initialise(mScreenManager.core());
+		mSpreadRenderer.initialise(mScreenManager.core());
 
-		mGameStateController.startNewGame();
+		// fasle to use the default seed
+		mGameStateController.startNewGame(false);
 
 	}
 
@@ -184,6 +189,19 @@ public class GameScreen extends BaseGameScreen {
 
 		super.update(pCore, pOtherScreenHasFocus, pCoveredByOtherScreen);
 
+		if (mGameStateController.isGameEnded()) {
+			if (mGameStateController.isGameWon()) {
+				// Game won
+				mScreenManager.addScreen(new GameWonScreen(mScreenManager, entityGroupID));
+
+			} else {
+				// Game lost
+				mScreenManager.addScreen(new GameLostScreen(mScreenManager, entityGroupID));
+
+			}
+
+		}
+
 	}
 
 	@Override
@@ -196,7 +214,7 @@ public class GameScreen extends BaseGameScreen {
 
 		TextureBatch lTextureBatch = mRendererManager.uiTextureBatch();
 		lTextureBatch.begin(pCore.HUD());
-		lTextureBatch.draw(mBackgroundTexture, lParallaxX, lParallaxY, 320, 320, -320, -320, 640, 640, -0.8f, 1f, 1f, 1f, 1f);
+		lTextureBatch.draw(mBackgroundTexture, lParallaxX, lParallaxY, 640, 640, -320, -320, 640, 640, -0.8f, 1f, 1f, 1f, 1f);
 		lTextureBatch.end();
 
 		GL11.glEnable(GL11.GL_DEPTH_TEST);

@@ -2,8 +2,8 @@ package com.ruse.spread;
 
 import org.lwjgl.opengl.GL11;
 
-import com.ruse.spread.screenmanager.screens.MainMenuScreen;
-import com.ruse.spread.screenmanager.screens.MenuBackground;
+import com.ruse.spread.screens.MainMenuScreen;
+import com.ruse.spread.screens.MenuBackground;
 
 import net.lintford.library.ConstantsTable;
 import net.lintford.library.GameInfo;

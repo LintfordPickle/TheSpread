@@ -6,7 +6,6 @@ import java.util.List;
 import com.ruse.spread.data.regions.CityRegion;
 import com.ruse.spread.data.regions.FarmRegion;
 import com.ruse.spread.data.regions.MineRegion;
-import com.ruse.spread.data.regions.SpreadRegion;
 
 import net.lintford.library.data.BaseData;
 
@@ -14,14 +13,12 @@ public abstract class WorldRegion extends BaseData {
 
 	public static WorldRegion createNewRegion(int pUID, int pType) {
 		switch (pType) {
-		case World.TILE_TYPE_MINE:
+		case World.REGION_TYPE_MINE:
 			return new MineRegion(pUID);
-		case World.TILE_TYPE_FARM:
+		case World.REGION_TYPE_FARM:
 			return new FarmRegion(pUID);
-		case World.TILE_TYPE_CITY:
+		case World.REGION_TYPE_CITY:
 			return new CityRegion(pUID);
-		case World.TILE_TYPE_SPAWNER:
-			return new SpreadRegion(pUID);
 		}
 
 		return null;
@@ -43,6 +40,7 @@ public abstract class WorldRegion extends BaseData {
 
 	protected List<Integer> tiles = new ArrayList<>();
 
+	public int health;
 	public float timer;
 
 	// ---------------------------------------------

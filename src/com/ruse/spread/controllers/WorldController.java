@@ -73,8 +73,4 @@ public class WorldController extends BaseController {
 
 	}
 
-	// ---------------------------------------------
-	// Methods
-	// ---------------------------------------------
-
 }

@@ -1,5 +1,6 @@
 package com.ruse.spread.renderers;
 
+import com.ruse.spread.GameConstants;
 import com.ruse.spread.controllers.WorldController;
 import com.ruse.spread.data.world.World;
 import com.ruse.spread.data.world.WorldRegion;
@@ -24,7 +25,7 @@ public class RegionRenderer extends BaseRenderer {
 
 	@Override
 	public int ZDepth() {
-		return 3;
+		return 4;
 	}
 
 	// ---------------------------------------------
@@ -76,7 +77,7 @@ public class RegionRenderer extends BaseRenderer {
 	private void drawRegions(LintfordCore pCore) {
 		int width = mWorldController.gameWorld().world().width;
 		int height = mWorldController.gameWorld().world().height;
-		int[] regionTiles = mWorldController.gameWorld().world().regions;
+		int[] regionTiles = mWorldController.gameWorld().world().regionIDs;
 		int[] timer = mWorldController.gameWorld().world().timer;
 		int[] variations = mWorldController.gameWorld().world().variants;
 
@@ -111,21 +112,7 @@ public class RegionRenderer extends BaseRenderer {
 				float srcY = 0;
 
 				switch (lRegion.type()) {
-				case World.TILE_TYPE_SPAWNER:
-					float lDep = (lWorld.spreaderDepth[ti] / 2f);
-					lR = 0.74f;
-					lG = 0.11f;
-					lB = 0.08f;
-					lA =  1f;//lDep;
-					timer[ti]--;
-					if (timer[ti] <= 0) {
-						variations[ti] = (int) (RandomNumbers.getRandomChance(2) ? RandomNumbers.random(0, 6) * 32 : 0f);
-						timer[ti] = 128; // frames
-					}
-
-					srcY = 0;
-					break;
-				case World.TILE_TYPE_CITY:
+				case World.REGION_TYPE_CITY:
 					srcY = 64;
 					lR = 1f;
 					lG = 1f;
@@ -135,7 +122,7 @@ public class RegionRenderer extends BaseRenderer {
 						timer[ti] = 1;
 					}
 					break;
-				case World.TILE_TYPE_FARM:
+				case World.REGION_TYPE_FARM:
 					srcY = 96;
 					lR = 1f;
 					lG = 1f;
@@ -145,7 +132,7 @@ public class RegionRenderer extends BaseRenderer {
 						timer[ti] = 1;
 					}
 					break;
-				case World.TILE_TYPE_MINE:
+				case World.REGION_TYPE_MINE:
 					srcY = 32;
 					lR = 1f;
 					lG = 1f;
@@ -157,7 +144,7 @@ public class RegionRenderer extends BaseRenderer {
 					break;
 				}
 
-				final int tileSize = World.TILE_SIZE;
+				final int tileSize = GameConstants.TILE_SIZE;
 
 				final float xOff = -width * tileSize * 0.5f;
 				final float yOff = -height * tileSize * 0.5f;

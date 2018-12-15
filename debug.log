@@ -1,87 +1,86 @@
-20.47.49.413: Help: Type 'help' in the console to see a list of commands
-20.47.49.414: ConstantsTable: Registered value: APPLICATION_NAME : The Spread
-20.47.49.414: ConstantsTable: Registered value: WINDOW_TITLE : The Spread
-20.47.49.416: DebugMemory: Maximum memory: 247.50 MiB
-20.47.49.416: DebugMemory: Total memory: 15.50 MiB
-20.47.49.416: DebugMemory: Free memory: 12.57 MiB
-20.47.49.417: DebugMemory: Used memory: 234.93 MiB
-20.47.49.417: BaseGame: Working directory: F:\dev\java\ludumdare\43\projects\LD43
-20.47.49.417: BaseGame: Oracle Corporation
-20.47.49.417: BaseGame: http://java.oracle.com/
-20.47.49.417: BaseGame: 1.8.0_171
-20.47.49.417: ConstantsTable: Registered value: APPLICATION_NAME : The Spread
-20.47.49.530: DisplayManager: Creating GLFWWindow
-20.47.50.292: DisplayManager: OpenGL version: 3.2.0 NVIDIA 399.07
-20.47.50.292: DisplayManager: GLFW Version3.3.0 Win32 WGL EGL VisualC DLL
-20.47.50.294: DisplayManager:    Window Position:   (0,0)
-20.47.50.294: DisplayManager:    Window Size:       (640,640)
-20.47.50.294: DisplayManager:    Desktop Size:      (1920,1080)
-20.47.50.294: DisplayManager:    Fullscreen Index:   0
-20.47.50.294: DisplayManager:    Monitor Index:      13118544
-20.47.50.294: DisplayManager:    Aspect Radio Index: 0
-20.47.50.300: ConstantsTable: Registered value: DEBUG_LIVE_TEXTURE_RELOAD : true
-20.47.50.448: Texture: Loaded texture from resource: /res/textures/CheckerBoard.png
-20.47.50.459: Texture: Loaded texture from resource: /res/textures/CheckerBoardIndexed.png
-20.47.50.533: Texture: Loaded texture from resource: /res/textures/core/system.png
-20.47.50.606: Texture: Loaded texture from resource: /res/textures/core/system.png
-20.47.50.676: Texture: Reloaded texture: res/textures/core/system.png
-20.47.50.702: Texture: Loaded texture from file: res/textures/screens/loading.png
-20.47.50.711: BaseGame: Loading GL content
-20.47.50.732: AudioManager: OpenALC10: true
-20.47.50.732: AudioManager: OpenALC11: true
-20.47.50.733: AudioManager: caps.ALC_EXT_EFX = true
-20.47.50.735: AudioManager: 0: OpenAL Soft on Speakers (Realtek High Definition Audio)
-20.47.50.735: AudioManager: 1: OpenAL Soft on Speakers (2- Ear Force Stealth 450)
-20.47.50.735: AudioManager: 2: OpenAL Soft on VG278 (NVIDIA High Definition Audio)
-20.47.50.735: AudioManager: Default device: OpenAL Soft
-20.47.50.761: AudioManager: ALC_FREQUENCY: 48000Hz
-20.47.50.762: AudioManager: ALC_REFRESH: 50Hz
-20.47.50.762: AudioManager: ALC_SYNC: false
-20.47.50.762: AudioManager: ALC_MONO_SOURCES: 255
-20.47.50.762: AudioManager: ALC_STEREO_SOURCES: 1
-20.47.51.135: RendererManager: TimedIntroScreenLoading GL content for all registered renderers
-20.47.51.261: Texture: Loaded texture from file: res/textures/screens/splash.png
-20.47.51.311: SYSTEM: calling window resize listeners.
-20.47.51.696: RendererManager: MenuBackgroundLoading GL content for all registered renderers
-20.47.51.747: Texture: Loaded texture from file: res/textures/screens/menu.png
-20.47.51.758: RendererManager: MainMenuScreenLoading GL content for all registered renderers
-20.47.52.786: RendererManager: LoadingScreenLoading GL content for all registered renderers
-20.47.52.808: Texture: Loaded texture from resource: /res/textures/core/loadingScreenText.png
-20.47.52.994: RendererManager: MenuBackgroundUnloading GL content for all renderers
-20.47.52.995: RendererManager: RendererManager: Removing all renderers
-20.47.52.995: RendererManager: TimedIntroScreenUnloading GL content for all renderers
-20.47.52.995: RendererManager: RendererManager: Removing all renderers
-20.47.53.011: RendererManager: MainMenuScreenUnloading GL content for all renderers
-20.47.53.011: RendererManager: RendererManager: Removing all renderers
-20.47.53.288: RendererManager: GameScreenLoading GL content for all registered renderers
-20.47.53.346: Texture: Loaded texture from file: res/textures/screens/background.png
-20.47.53.346: RendererManager: LoadingScreenUnloading GL content for all renderers
-20.47.53.346: RendererManager: RendererManager: Removing all renderers
-20.47.53.347: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
-20.47.53.347: BaseRenderer: Loading GL Content (RoadRenderer)
-20.47.53.347: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
-20.47.53.347: BaseRenderer: Loading GL Content (WorldRenderer)
-20.47.53.351: Texture: Loaded texture from file: res/textures/game.png
-20.47.53.501: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
-20.47.53.501: BaseRenderer: Loading GL Content (RegionRenderer)
-20.47.53.501: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
-20.47.53.502: BaseRenderer: Loading GL Content (NodeRenderer)
-20.47.53.502: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
-20.47.53.502: BaseRenderer: Loading GL Content (DebugRenderer)
-20.47.53.502: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
-20.47.53.502: BaseRenderer: Loading GL Content (ProjectileRenderer)
-20.47.53.506: Texture: Loaded texture from file: res/textures/particles.png
-20.47.53.506: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
-20.47.53.506: BaseRenderer: Loading GL Content (HUDRenderer)
-20.47.53.507: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
-20.47.53.507: BaseRenderer: Loading GL Content (MouseRenderer)
-20.48.02.424: BaseGame: Unloading GL content
-20.48.02.435: RendererManager: GameScreenUnloading GL content for all renderers
-20.48.02.435: BaseRenderer: Unloading GL Content (RoadRenderer)
-20.48.02.435: BaseRenderer: Unloading GL Content (WorldRenderer)
-20.48.02.435: BaseRenderer: Unloading GL Content (RegionRenderer)
-20.48.02.435: BaseRenderer: Unloading GL Content (NodeRenderer)
-20.48.02.435: BaseRenderer: Unloading GL Content (DebugRenderer)
-20.48.02.435: BaseRenderer: Unloading GL Content (ProjectileRenderer)
-20.48.02.435: BaseRenderer: Unloading GL Content (HUDRenderer)
-20.48.02.435: BaseRenderer: Unloading GL Content (MouseRenderer)
+17.11.55.765: Help: Type 'help' in the console to see a list of commands
+17.11.55.765: ConstantsTable: Registered value: APPLICATION_NAME : The Spread
+17.11.55.765: ConstantsTable: Registered value: WINDOW_TITLE : The Spread
+17.11.55.767: DebugMemory: Maximum memory: 247.50 MiB
+17.11.55.768: DebugMemory: Total memory: 15.50 MiB
+17.11.55.768: DebugMemory: Free memory: 12.53 MiB
+17.11.55.768: DebugMemory: Used memory: 234.97 MiB
+17.11.55.768: BaseGame: Working directory: F:\dev\java\ludumdare\43\projects\LD43
+17.11.55.768: BaseGame: Oracle Corporation
+17.11.55.768: BaseGame: http://java.oracle.com/
+17.11.55.768: BaseGame: 1.8.0_171
+17.11.55.768: ConstantsTable: Registered value: APPLICATION_NAME : The Spread
+17.11.55.889: DisplayManager: Creating GLFWWindow
+17.11.56.733: DisplayManager: OpenGL version: 3.2.0 NVIDIA 399.07
+17.11.56.734: DisplayManager: GLFW Version3.3.0 Win32 WGL EGL VisualC DLL
+17.11.56.734: DisplayManager:    Window Position:   (0,0)
+17.11.56.734: DisplayManager:    Window Size:       (640,640)
+17.11.56.734: DisplayManager:    Desktop Size:      (1920,1080)
+17.11.56.734: DisplayManager:    Fullscreen Index:   0
+17.11.56.735: DisplayManager:    Monitor Index:      11262592
+17.11.56.735: DisplayManager:    Aspect Radio Index: 0
+17.11.56.740: ConstantsTable: Registered value: DEBUG_LIVE_TEXTURE_RELOAD : true
+17.11.56.902: Texture: Loaded texture from resource: /res/textures/CheckerBoard.png
+17.11.56.913: Texture: Loaded texture from resource: /res/textures/CheckerBoardIndexed.png
+17.11.56.992: Texture: Loaded texture from resource: /res/textures/core/system.png
+17.11.57.065: Texture: Loaded texture from resource: /res/textures/core/system.png
+17.11.57.132: Texture: Reloaded texture: res/textures/core/system.png
+17.11.57.159: Texture: Loaded texture from file: res/textures/screens/loading.png
+17.11.57.176: BaseGame: Loading GL content
+17.11.57.197: AudioManager: OpenALC10: true
+17.11.57.197: AudioManager: OpenALC11: true
+17.11.57.197: AudioManager: caps.ALC_EXT_EFX = true
+17.11.57.200: AudioManager: 0: OpenAL Soft on Speakers (Realtek High Definition Audio)
+17.11.57.200: AudioManager: 1: OpenAL Soft on Speakers (2- Ear Force Stealth 450)
+17.11.57.200: AudioManager: 2: OpenAL Soft on VG278 (NVIDIA High Definition Audio)
+17.11.57.200: AudioManager: Default device: OpenAL Soft
+17.11.57.273: AudioManager: ALC_FREQUENCY: 48000Hz
+17.11.57.273: AudioManager: ALC_REFRESH: 50Hz
+17.11.57.273: AudioManager: ALC_SYNC: false
+17.11.57.273: AudioManager: ALC_MONO_SOURCES: 255
+17.11.57.274: AudioManager: ALC_STEREO_SOURCES: 1
+17.11.57.649: RendererManager: MenuBackgroundLoading GL content for all registered renderers
+17.11.57.776: Texture: Loaded texture from file: res/textures/screens/menu.png
+17.11.57.776: RendererManager: MainMenuScreenLoading GL content for all registered renderers
+17.11.57.951: SYSTEM: calling window resize listeners.
+17.12.10.585: RendererManager: LoadingScreenLoading GL content for all registered renderers
+17.12.10.608: Texture: Loaded texture from resource: /res/textures/core/loadingScreenText.png
+17.12.10.795: RendererManager: MenuBackgroundUnloading GL content for all renderers
+17.12.10.796: RendererManager: RendererManager: Removing all renderers
+17.12.10.829: RendererManager: MainMenuScreenUnloading GL content for all renderers
+17.12.10.830: RendererManager: RendererManager: Removing all renderers
+17.12.11.077: RendererManager: GameScreenLoading GL content for all registered renderers
+17.12.11.148: Texture: Loaded texture from file: res/textures/screens/background.png
+17.12.11.148: RendererManager: LoadingScreenUnloading GL content for all renderers
+17.12.11.148: RendererManager: RendererManager: Removing all renderers
+17.12.11.148: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
+17.12.11.148: BaseRenderer: Loading GL Content (WorldRenderer)
+17.12.11.152: Texture: Loaded texture from file: res/textures/game.png
+17.12.11.155: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
+17.12.11.155: BaseRenderer: Loading GL Content (RoadRenderer)
+17.12.11.155: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
+17.12.11.155: BaseRenderer: Loading GL Content (RegionRenderer)
+17.12.11.155: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
+17.12.11.155: BaseRenderer: Loading GL Content (SpreadRenderer)
+17.12.11.155: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
+17.12.11.155: BaseRenderer: Loading GL Content (NodeRenderer)
+17.12.11.156: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
+17.12.11.156: BaseRenderer: Loading GL Content (ProjectileRenderer)
+17.12.11.160: Texture: Loaded texture from file: res/textures/particles.png
+17.12.11.160: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
+17.12.11.160: BaseRenderer: Loading GL Content (HUDRenderer)
+17.12.11.160: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
+17.12.11.160: BaseRenderer: Loading GL Content (MouseRenderer)
+17.12.11.160: RendererManager: GameScreenReloading content in Update() (BaseRenderer) 
+17.12.11.160: BaseRenderer: Loading GL Content (DebugRenderer)
+17.17.51.323: BaseGame: Unloading GL content
+17.17.51.334: RendererManager: GameScreenUnloading GL content for all renderers
+17.17.51.334: BaseRenderer: Unloading GL Content (WorldRenderer)
+17.17.51.334: BaseRenderer: Unloading GL Content (RoadRenderer)
+17.17.51.334: BaseRenderer: Unloading GL Content (RegionRenderer)
+17.17.51.334: BaseRenderer: Unloading GL Content (SpreadRenderer)
+17.17.51.334: BaseRenderer: Unloading GL Content (NodeRenderer)
+17.17.51.334: BaseRenderer: Unloading GL Content (ProjectileRenderer)
+17.17.51.335: BaseRenderer: Unloading GL Content (HUDRenderer)
+17.17.51.335: BaseRenderer: Unloading GL Content (MouseRenderer)
+17.17.51.335: BaseRenderer: Unloading GL Content (DebugRenderer)

@@ -2,22 +2,19 @@ package com.ruse.spread.renderers;
 
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.glfw.GLFW;
 
 import com.ruse.spread.controllers.MouseController;
 import com.ruse.spread.controllers.NodeController;
 import com.ruse.spread.controllers.WorldController;
-import com.ruse.spread.data.world.World;
-import com.ruse.spread.data.world.WorldEdge;
-import com.ruse.spread.data.world.WorldNode;
 import com.ruse.spread.data.world.WorldPackage;
+import com.ruse.spread.data.world.nodes.WorldNode;
 
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.geometry.Rectangle;
 import net.lintford.library.core.graphics.ResourceManager;
 import net.lintford.library.core.graphics.fonts.FontManager.FontUnit;
-import net.lintford.library.core.graphics.linebatch.LineBatch;
 import net.lintford.library.core.graphics.textures.Texture;
 import net.lintford.library.core.graphics.textures.TextureManager;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
@@ -50,7 +47,7 @@ public class NodeRenderer extends BaseRenderer {
 
 	@Override
 	public int ZDepth() {
-		return 4;
+		return 5;
 	}
 
 	// ---------------------------------------------
@@ -59,6 +56,9 @@ public class NodeRenderer extends BaseRenderer {
 
 	public NodeRenderer(RendererManager pRendererManager, int pGroupID) {
 		super(pRendererManager, RENDERER_NAME, pGroupID);
+
+		mDrawPop = true;
+		mDrawHash = false;
 
 	}
 
@@ -86,6 +86,10 @@ public class NodeRenderer extends BaseRenderer {
 
 	@Override
 	public boolean handleInput(LintfordCore pCore) {
+
+		if (pCore.input().keyDownTimed(GLFW.GLFW_KEY_F8)) {
+			mDrawHash = !mDrawHash;
+		}
 
 		if (pCore.input().isMouseTimedLeftClickAvailable()) {
 			if (mMouseController.isBuilding && mMouseController.tempWorldNode != null) {
@@ -129,9 +133,6 @@ public class NodeRenderer extends BaseRenderer {
 
 	@Override
 	public void draw(LintfordCore pCore) {
-
-		drawEdges(pCore);
-
 		drawPackages(pCore);
 
 		drawNodes(pCore);
@@ -141,104 +142,6 @@ public class NodeRenderer extends BaseRenderer {
 	// ---------------------------------------------
 	// Methods
 	// ---------------------------------------------
-
-	public void drawNodes(LintfordCore pCore) {
-		TextureBatch lTextureBatch = mRendererManager.uiTextureBatch();
-		FontUnit lFont = mRendererManager.textFont();
-
-		lTextureBatch.begin(pCore.gameCamera());
-		lFont.begin(pCore.gameCamera());
-
-		List<WorldNode> lNodes = mWorldController.gameWorld().nodes();
-		final int lNumNodes = lNodes.size();
-		for (int i = 0; i < lNumNodes; i++) {
-			WorldNode lNode = lNodes.get(i);
-
-			int xSrc = 0;
-			int ySrc = 128;
-			switch (lNode.nodeType()) {
-			case WorldNode.NODE_TYPE_HQ:
-				break;
-			case WorldNode.NODE_TYPE_NORMAL:
-				xSrc = 32;
-				ySrc = 128;
-				break;
-			case WorldNode.NODE_TYPE_LONG:
-				xSrc = 64;
-				ySrc = 128;
-				break;
-			case WorldNode.NODE_TYPE_STORAGE:
-				xSrc = 96;
-				ySrc = 128;
-				break;
-			case WorldNode.NODE_TYPE_TURRET:
-				xSrc = 128;
-				ySrc = 128;
-				break;
-			case WorldNode.NODE_TYPE_PILLBOX:
-				xSrc = 160;
-				ySrc = 128;
-				break;
-			case WorldNode.NODE_TYPE_MORTAR:
-				xSrc = 192;
-				ySrc = 128;
-				break;
-			}
-
-			float lNotConstructedModifier = lNode.isConstructed ? 1f : 0.5f;
-
-			lTextureBatch.draw(mGameTexture, xSrc, ySrc, 32, 32, lNode.mBounds, -0.2f, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier, lNotConstructedModifier);
-			lTextureBatch.draw(mGameTexture, 64, 160, 16, 16, lNode.mBounds.x + 16, lNode.mBounds.y - 16, 16, 16, -0.2f, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier,
-					lNotConstructedModifier);
-
-			mDrawPop = true;
-			if (mDrawPop) // pop count
-				lFont.draw("" + lNode.populationStore, lNode.mBounds.x, lNode.mBounds.y - 18, -0.2f, 1f, 0f, 0f, 1f, 1f);
-
-			if (mDrawHash) // hash
-				lFont.draw("" + lNode.hashCode(), lNode.mBounds.x, lNode.mBounds.y - 16, -0.2f, 1f, 0f, 0f, 1f, 1f);
-
-		}
-
-		lTextureBatch.end();
-		lFont.end();
-	}
-
-	public void drawEdges(LintfordCore pCore) {
-		LineBatch lLineBatch = mRendererManager.uiLineBatch();
-
-		final float xOff = -World.WIDTH * 0.5f * World.TILE_SIZE;
-		final float yOff = -World.HEIGHT * 0.5f * World.TILE_SIZE;
-
-		lLineBatch.begin(pCore.gameCamera());
-
-		List<WorldEdge> lEdges = mWorldController.gameWorld().edges();
-		final int lNumEdges = lEdges.size();
-		for (int i = 0; i < lNumEdges; i++) {
-			WorldEdge lEdge = lEdges.get(i);
-
-			float x1 = lEdge.node1.tileIndex % World.WIDTH * World.TILE_SIZE;
-			float y1 = lEdge.node1.tileIndex / World.WIDTH * World.TILE_SIZE;
-
-			float x2 = lEdge.node2.tileIndex % World.WIDTH * World.TILE_SIZE;
-			float y2 = lEdge.node2.tileIndex / World.WIDTH * World.TILE_SIZE;
-
-			boolean lIsActive = lEdge.node1.isConstructed && lEdge.node2.isConstructed;
-
-			float lR = lIsActive ? (80f / 255f) : 0.2f;
-			float lG = lIsActive ? (43f / 255f) : 0.2f;
-			float lB = lIsActive ? (26f / 255f) : 0.2f;
-
-			int lLineWidth = (int) (8f * pCore.gameCamera().getZoomFactor());
-			GL11.glLineWidth(lLineWidth);
-			final float lHalfTile = World.TILE_SIZE / 2f;
-			lLineBatch.a = 0.7f;
-			lLineBatch.draw(xOff + x1 + lHalfTile, yOff + y1 + lHalfTile, xOff + x2 + lHalfTile, yOff + y2 + lHalfTile, -0.3f, lR, lG, lB);
-
-		}
-
-		lLineBatch.end();
-	}
 
 	public void drawPackages(LintfordCore pCore) {
 		TextureBatch lTextureBatch = mRendererManager.uiTextureBatch();
@@ -276,6 +179,81 @@ public class NodeRenderer extends BaseRenderer {
 
 			Rectangle lRect = lWorldPackage.mBounds;
 			lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, xSrc, ySrc, 16, 16, lRect, -0.25f, 1f, 1f, 1f, 1f);
+
+		}
+
+		lTextureBatch.end();
+		lFont.end();
+	}
+
+	public void drawNodes(LintfordCore pCore) {
+		TextureBatch lTextureBatch = mRendererManager.uiTextureBatch();
+		FontUnit lFont = mRendererManager.textFont();
+
+		lTextureBatch.begin(pCore.gameCamera());
+		lFont.begin(pCore.gameCamera());
+
+		List<WorldNode> lNodes = mWorldController.gameWorld().nodes();
+		final int lNumNodes = lNodes.size();
+		for (int i = 0; i < lNumNodes; i++) {
+			WorldNode lNode = lNodes.get(i);
+
+			int xSrc = 0;
+			int ySrc = 128;
+			switch (lNode.nodeType()) {
+			case WorldNode.NODE_TYPE_HQ:
+				break;
+			case WorldNode.NODE_TYPE_SPREADER:
+				xSrc = 96;
+				ySrc = 32;
+				break;
+			case WorldNode.NODE_TYPE_NORMAL:
+				xSrc = 32;
+				ySrc = 128;
+				break;
+			case WorldNode.NODE_TYPE_LONG:
+				xSrc = 64;
+				ySrc = 128;
+				break;
+			case WorldNode.NODE_TYPE_STORAGE:
+				xSrc = 96;
+				ySrc = 128;
+				break;
+			case WorldNode.NODE_TYPE_TURRET:
+				xSrc = 128;
+				ySrc = 128;
+				break;
+			case WorldNode.NODE_TYPE_PILLBOX:
+				xSrc = 160;
+				ySrc = 128;
+				break;
+			case WorldNode.NODE_TYPE_MORTAR:
+				xSrc = 192;
+				ySrc = 128;
+				break;
+			}
+
+			float lNotConstructedModifier = lNode.isConstructed ? 1f : 0.5f;
+
+			lTextureBatch.draw(mGameTexture, xSrc, ySrc, 32, 32, lNode.mBounds, -0.2f, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier, lNotConstructedModifier);
+			if (mDrawPop && lNode.nodeType() != WorldNode.NODE_TYPE_SPREADER)
+				lTextureBatch.draw(mGameTexture, 64, 160, 16, 16, lNode.mBounds.x + 16, lNode.mBounds.y - 16, 16, 16, -0.2f, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier,
+						lNotConstructedModifier);
+
+			float lPopR = 1f;
+			float lPopG = (lNode.populationStore > lNode.maintainMinimumPop) ? 1f : 0f;
+			float lPopB = (lNode.populationStore > lNode.maintainMinimumPop) ? 1f : 0f;
+
+			if (lNode.nodeType() == WorldNode.NODE_TYPE_TURRET) {
+				lTextureBatch.draw(mGameTexture, 160, 160, 32, 16, lNode.mBounds.centerX() - 6, lNode.mBounds.centerY() - 7, 32, 16, -0.2f, lNode.angle, 4, 7, 0.5f, 1f * lNotConstructedModifier,
+						1f * lNotConstructedModifier, 1f * lNotConstructedModifier, lNotConstructedModifier);
+			}
+
+			if (mDrawPop && lNode.nodeType() != WorldNode.NODE_TYPE_SPREADER) // pop count
+				lFont.draw("" + lNode.populationStore, lNode.mBounds.x, lNode.mBounds.y - 18, -0.2f, lPopR, lPopG, lPopB, 1f, 1f);
+
+			if (mDrawHash) // hash
+				lFont.draw("" + lNode.hashCode(), lNode.mBounds.x, lNode.mBounds.y + lNode.mBounds.h, -0.2f, 1f, 0f, 0f, 1f, 1f);
 
 		}
 

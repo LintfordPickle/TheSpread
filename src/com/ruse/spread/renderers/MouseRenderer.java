@@ -1,7 +1,7 @@
 package com.ruse.spread.renderers;
 
 import com.ruse.spread.controllers.MouseController;
-import com.ruse.spread.data.world.WorldNode;
+import com.ruse.spread.data.world.nodes.WorldNode;
 
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;

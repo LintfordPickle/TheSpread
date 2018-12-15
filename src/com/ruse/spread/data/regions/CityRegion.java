@@ -28,7 +28,7 @@ public class CityRegion extends WorldRegion {
 	// ---------------------------------------------
 
 	public CityRegion(int pUID) {
-		super(pUID, World.TILE_TYPE_CITY);
+		super(pUID, World.REGION_TYPE_CITY);
 
 		name = "City";
 

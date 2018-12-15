@@ -1,4 +1,4 @@
-package com.ruse.spread.screenmanager.screens;
+package com.ruse.spread.screens;
 
 import net.lintford.library.screenmanager.MenuEntry;
 import net.lintford.library.screenmanager.MenuScreen;

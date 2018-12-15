@@ -1,16 +1,15 @@
 package com.ruse.spread.renderers;
 
-import com.ruse.spread.controllers.GameStateController;
 import com.ruse.spread.controllers.MouseController;
 import com.ruse.spread.controllers.NodeController;
 import com.ruse.spread.controllers.WorldController;
-import com.ruse.spread.data.GameState;
+import com.ruse.spread.data.GameWorld;
 import com.ruse.spread.data.regions.CityRegion;
 import com.ruse.spread.data.regions.FarmRegion;
 import com.ruse.spread.data.regions.MineRegion;
 import com.ruse.spread.data.world.World;
-import com.ruse.spread.data.world.WorldNode;
 import com.ruse.spread.data.world.WorldRegion;
+import com.ruse.spread.data.world.nodes.WorldNode;
 
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
@@ -43,7 +42,6 @@ public class HUDRenderer extends BaseRenderer {
 	// Variables
 	// ---------------------------------------------
 
-	private GameStateController mGameStateController;
 	private NodeController mNodeController;
 	private WorldController mWorldController;
 
@@ -60,7 +58,7 @@ public class HUDRenderer extends BaseRenderer {
 
 	private MouseController mMouseController;
 
-	private String mMouseOverText;
+	private String mMouseOverText = "";
 
 	private WorldNode mSelectedNode;
 	private WorldRegion mSelectedRegion;
@@ -104,7 +102,6 @@ public class HUDRenderer extends BaseRenderer {
 	public void initialise(LintfordCore pCore) {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
-		mGameStateController = (GameStateController) lControllerManager.getControllerByNameRequired(GameStateController.CONTROLLER_NAME, mEntityID);
 		mMouseController = (MouseController) lControllerManager.getControllerByNameRequired(MouseController.CONTROLLER_NAME, mEntityID);
 		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mEntityID);
 		mNodeController = (NodeController) lControllerManager.getControllerByNameRequired(NodeController.CONTROLLER_NAME, mEntityID);
@@ -181,20 +178,31 @@ public class HUDRenderer extends BaseRenderer {
 
 		lTextureBatch.end();
 
-		final GameState lGameState = mGameStateController.gameState();
+		final GameWorld lGameWorld = mWorldController.gameWorld();
 
 		FontUnit lFont = mRendererManager.textFont();
 		lFont.begin(pCore.HUD());
 
-		lFont.draw(mMouseOverText, lPanelPositionX + 5f, lPanelPositionY - 25, -0.02f, 0.85f, 0.91f, 1f, 1f, 1f, -1);
+		float SUB_PANEL_HEIGHT = 100;
+		float lMinusY = 325 - PANEL_HEIGHT - SUB_PANEL_HEIGHT;
+
+		if (!mMouseOverText.isEmpty()) {
+			lTextureBatch.begin(pCore.HUD());
+			lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 0, 0, 32, 32, -315, lPanelPositionY - 30, 270, 25, -0.1f, 0.1f, 0.12f, 0f, 0.55f);
+			lTextureBatch.end();
+
+			lFont.draw(mMouseOverText, lPanelPositionX + 15f, lPanelPositionY - 25, -0.02f, 0.85f, 0.91f, 1f, 1f, 1f, -1);
+			lMinusY -= 40;
+
+		}
 
 		final float lTextScale = 1f;
 		final float lTextPaddingX = 25f;
 		final float lTextPaddingY = 20f;
-		lFont.draw("HQ Status: ", lPanelPositionX + lTextPaddingX, lPanelPositionY + lTextPaddingY - 2, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
-		lFont.draw("Population: " + lGameState.population + "/" + lGameState.populationWorld, lPanelPositionX + lTextPaddingX + 5f, lPanelPositionY + lTextPaddingY * 2, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
-		lFont.draw("Food: " + lGameState.food, lPanelPositionX + lTextPaddingX + 5f, lPanelPositionY + lTextPaddingY * 3, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
-		lFont.draw("Metals: " + lGameState.metals, lPanelPositionX + lTextPaddingX + 5f, lPanelPositionY + lTextPaddingY * 4, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
+		lFont.draw("World Status: ", lPanelPositionX + lTextPaddingX, lPanelPositionY + lTextPaddingY - 2, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
+		lFont.draw("Population: " + lGameWorld.getWorldPop() + "/" + lGameWorld.getMaxWorldPop(), lPanelPositionX + lTextPaddingX + 5f, lPanelPositionY + lTextPaddingY * 2, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
+		lFont.draw("Food: " + lGameWorld.getWorldFood() + "/" + lGameWorld.getMaxFood(), lPanelPositionX + lTextPaddingX + 5f, lPanelPositionY + lTextPaddingY * 3, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
+		lFont.draw("Metals: " + lGameWorld.getWorldMetal() + "/" + lGameWorld.getMaxMetal(), lPanelPositionX + lTextPaddingX + 5f, lPanelPositionY + lTextPaddingY * 4, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 
 		lFont.draw("Nodes", lPanelPositionX + 230 + lTextPaddingX, lPanelPositionY + lTextPaddingY - 2, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 		lFont.draw("Military Nodes", lPanelPositionX + 345 + lTextPaddingX, lPanelPositionY + lTextPaddingY - 2, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
@@ -202,9 +210,6 @@ public class HUDRenderer extends BaseRenderer {
 		lFont.draw("Press F2 for help", lPanelPositionX + 440 + lTextPaddingX, lPanelPositionY + lTextPaddingY + 75, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 
 		lFont.end();
-
-		float SUB_PANEL_HEIGHT = 100;
-		float lMinusY = 325 - PANEL_HEIGHT - SUB_PANEL_HEIGHT;
 
 		if (mSelectedNode != null) {
 			// Render node information
@@ -220,8 +225,10 @@ public class HUDRenderer extends BaseRenderer {
 
 			lTextureBatch.begin(pCore.HUD());
 			if (mSelectedNode.isConstructed) {
+				String lRegionName = (mSelectedRegion != null) ? "(" + mSelectedRegion.name + ")" : "";
+
 				lFont.begin(pCore.HUD());
-				lFont.draw("Node: " + mSelectedNode.name, -310, lMinusY, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
+				lFont.draw(String.format("Node: %s %s", mSelectedNode.name, lRegionName), -310, lMinusY, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 
 				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 160, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("People: " + mSelectedNode.populationStore + "/" + mSelectedNode.storageCapacityPopulation, -280, lMinusY + 25, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
@@ -265,7 +272,7 @@ public class HUDRenderer extends BaseRenderer {
 
 			lTextureBatch.begin(pCore.HUD());
 			switch (mSelectedRegion.type()) {
-			case World.TILE_TYPE_CITY:
+			case World.REGION_TYPE_CITY:
 				CityRegion lCity = (CityRegion) mSelectedRegion;
 				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 160, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("People: " + lCity.popStorage + "/" + lCity.popStorageCapacity, -280, lMinusY + 25, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
@@ -274,21 +281,18 @@ public class HUDRenderer extends BaseRenderer {
 				lFont.draw("Food: " + lCity.foodStorage + "/" + lCity.foodStorageCapacity, -280, lMinusY + 45, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 				break;
 
-			case World.TILE_TYPE_FARM:
+			case World.REGION_TYPE_FARM:
 				FarmRegion lFarm = (FarmRegion) mSelectedRegion;
 				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 192, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("Food: " + lFarm.storage + "/" + lFarm.storageCapacity, -280, lMinusY + 25, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 				break;
 
-			case World.TILE_TYPE_MINE:
+			case World.REGION_TYPE_MINE:
 				MineRegion lMine = (MineRegion) mSelectedRegion;
 				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 224, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("Metal: " + lMine.storage + "/" + lMine.storageCapacity, -280, lMinusY + 25, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 				break;
 
-			case World.TILE_TYPE_SPAWNER:
-				lFont.draw("A horrible, pulsing red mass, ozzing through the land", -280, lMinusY + 25, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, 270);
-				break;
 			}
 			lTextureBatch.end();
 
@@ -324,7 +328,7 @@ public class HUDRenderer extends BaseRenderer {
 		}
 
 		if (mNodeNormalButtonArea.intersectsAA(pCore.HUD().getMouseCameraSpace())) {
-			mMouseOverText = "Road junction";
+			mMouseOverText = "Build Road junction";
 			if (pCore.input().isMouseTimedLeftClickAvailable()) {
 				if (!mMouseController.isBuilding && mMouseController.tempWorldNode == null) {
 					WorldNode lNewNode = new WorldNode();
@@ -342,7 +346,7 @@ public class HUDRenderer extends BaseRenderer {
 		}
 
 		if (mNodeLongButtonArea.intersectsAA(pCore.HUD().getMouseCameraSpace())) {
-			mMouseOverText = "Long Node";
+			mMouseOverText = "Build Long Node";
 			if (pCore.input().isMouseTimedLeftClickAvailable()) {
 				if (!mMouseController.isBuilding && mMouseController.tempWorldNode == null) {
 					WorldNode lNewNode = new WorldNode();
@@ -362,7 +366,7 @@ public class HUDRenderer extends BaseRenderer {
 		}
 
 		if (mNodeStorageButtonArea.intersectsAA(pCore.HUD().getMouseCameraSpace())) {
-			mMouseOverText = "Storage Node";
+			mMouseOverText = "Build Storage Node";
 			if (pCore.input().isMouseTimedLeftClickAvailable()) {
 				if (!mMouseController.isBuilding && mMouseController.tempWorldNode == null) {
 					WorldNode lNewNode = new WorldNode();
@@ -383,7 +387,7 @@ public class HUDRenderer extends BaseRenderer {
 
 		// Build pillbox
 		if (mPillBoxButtonArea.intersectsAA(pCore.HUD().getMouseCameraSpace())) {
-			mMouseOverText = "Pillbox Node";
+			mMouseOverText = "Build Pillbox";
 			if (pCore.input().isMouseTimedLeftClickAvailable()) {
 				if (!mMouseController.isBuilding && mMouseController.tempWorldNode == null) {
 					WorldNode lNewNode = new WorldNode();
@@ -404,7 +408,7 @@ public class HUDRenderer extends BaseRenderer {
 
 		// Build turret
 		if (mTurretButtonArea.intersectsAA(pCore.HUD().getMouseCameraSpace())) {
-			mMouseOverText = "Turret Node";
+			mMouseOverText = "Build Turret";
 			if (pCore.input().isMouseTimedLeftClickAvailable()) {
 				if (!mMouseController.isBuilding && mMouseController.tempWorldNode == null) {
 					WorldNode lNewNode = new WorldNode();
@@ -424,7 +428,7 @@ public class HUDRenderer extends BaseRenderer {
 		}
 
 		if (mMortarButtonArea.intersectsAA(pCore.HUD().getMouseCameraSpace())) {
-			mMouseOverText = "Mortar Node";
+			mMouseOverText = "Build Mortar";
 			if (pCore.input().isMouseTimedLeftClickAvailable()) {
 
 				if (!mMouseController.isBuilding && mMouseController.tempWorldNode == null) {

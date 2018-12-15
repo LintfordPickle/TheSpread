@@ -105,7 +105,7 @@ public class ParticleController extends BaseController {
 	}
 
 	private void createParticleSystems() {
-		ParticleSystem lBulletsParticleSystem = new ParticleSystem("Turret", 128);
+		ParticleSystem lBulletsParticleSystem = new ParticleSystem("Pillbox", 128);
 
 		lBulletsParticleSystem.addInitialiser(new ParticleTurnToFaceInitialiser());
 		lBulletsParticleSystem.addInitialiser(new ParticleSourceRegionInitialiser(0, 0, 32, 32));
@@ -114,8 +114,16 @@ public class ParticleController extends BaseController {
 		lBulletsParticleSystem.addModifier(new ParticlePhysicsModifier());
 		lBulletsParticleSystem.addModifier(new ParticleBulletCollisionModifier(this, mWorldController.gameWorld()));
 
-		ParticleSystem lMortarParticleSystem = new ParticleSystem("Mortar", 128);
+		ParticleSystem lTurretParticleSystem = new ParticleSystem("Turret", 128);
 
+		lTurretParticleSystem.addInitialiser(new ParticleTurnToFaceInitialiser());
+		lTurretParticleSystem.addInitialiser(new ParticleSourceRegionInitialiser(64, 0, 32, 32));
+
+		lTurretParticleSystem.addModifier(new ParticleLifetimeModifier());
+		lTurretParticleSystem.addModifier(new ParticlePhysicsModifier());
+		lTurretParticleSystem.addModifier(new ParticleBulletCollisionModifier(this, mWorldController.gameWorld()));
+
+		ParticleSystem lMortarParticleSystem = new ParticleSystem("Mortar", 128);
 		lMortarParticleSystem.addInitialiser(new ParticleTurnToFaceInitialiser());
 		lMortarParticleSystem.addInitialiser(new ParticleSourceRegionInitialiser(64, 0, 32, 32));
 
@@ -136,25 +144,26 @@ public class ParticleController extends BaseController {
 		ParticleSystem lDebrisParticleSystem = new ParticleSystem("Debris", 128);
 		lDebrisParticleSystem.addInitialiser(new ParticleTurnToFaceInitialiser());
 		lDebrisParticleSystem.addInitialiser(new ParticleSourceRegionInitialiser(32, 0, 32, 32));
-		lDebrisParticleSystem.addInitialiser(new ParticleRandomSizeInitialiser(0.4f, 1.0f));
+		lDebrisParticleSystem.addInitialiser(new ParticleRandomSizeInitialiser(1.5f, 2.0f));
 		lDebrisParticleSystem.addInitialiser(new ParticleRandomRotationInitialiser(0, 360));
 
 		lDebrisParticleSystem.addModifier(new ParticleLifetimeModifier());
 		lDebrisParticleSystem.addModifier(new ParticlePhysicsModifier());
 		lDebrisParticleSystem.addModifier(new ParticleLifetimeAlphaFadeInOutModifier());
 
-		// TODO: Need to define muzzle particles properly
-		ParticleSystem lMuzzleParticleSystem = new ParticleSystem("muzzle", 64);
+		ParticleSystem lMuzzleParticleSystem = new ParticleSystem("Muzzle", 64);
 		lMuzzleParticleSystem.addInitialiser(new ParticleTurnToFaceInitialiser());
-		lMuzzleParticleSystem.addInitialiser(new ParticleSourceRegionInitialiser(32, 0, 32, 32));
+		lMuzzleParticleSystem.addInitialiser(new ParticleSourceRegionInitialiser(64, 32, 32, 32));
 		lMuzzleParticleSystem.addInitialiser(new ParticleRandomSizeInitialiser(0.4f, 1.0f));
 		lMuzzleParticleSystem.addInitialiser(new ParticleRandomRotationInitialiser(0, 360));
+		lMuzzleParticleSystem.addInitialiser(new ParticleRandomSizeInitialiser(2, 4));
 
 		lMuzzleParticleSystem.addModifier(new ParticleLifetimeModifier());
 		lMuzzleParticleSystem.addModifier(new ParticlePhysicsModifier());
 		lMuzzleParticleSystem.addModifier(new ParticleLifetimeAlphaFadeInOutModifier());
 
 		mProjectileManager.addParticleSystem(lBulletsParticleSystem);
+		mProjectileManager.addParticleSystem(lTurretParticleSystem);
 		mProjectileManager.addParticleSystem(lMortarParticleSystem);
 		mProjectileManager.addParticleSystem(lSmokeParticleSystem);
 		mProjectileManager.addParticleSystem(lDebrisParticleSystem);

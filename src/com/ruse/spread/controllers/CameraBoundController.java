@@ -2,8 +2,7 @@ package com.ruse.spread.controllers;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.ruse.spread.data.world.World;
-
+import com.ruse.spread.GameConstants;
 import net.lintford.library.controllers.BaseController;
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
@@ -172,8 +171,8 @@ public class CameraBoundController extends BaseController {
 
 	public void setup(float pPosX, float pPosY, float pLeft, float pTop, float pRight, float pBottom) {
 		if (mGameCamera != null) {
-			mHomePositionX = -pPosX - World.TILE_SIZE * 0.5f;
-			mHomePositionY = -pPosY - World.TILE_SIZE * 0.5f;
+			mHomePositionX = -pPosX - GameConstants.TILE_SIZE * 0.5f;
+			mHomePositionY = -pPosY - GameConstants.TILE_SIZE * 0.5f;
 
 			mGameCamera.setPosition(mHomePositionX, mHomePositionY);
 			mPositionOffsetX = mHomePositionX;

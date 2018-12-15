@@ -25,7 +25,7 @@ public class FarmRegion extends WorldRegion {
 	// ---------------------------------------------
 
 	public FarmRegion(int pUID) {
-		super(pUID, World.TILE_TYPE_FARM);
+		super(pUID, World.REGION_TYPE_FARM);
 
 		name = "Farm";
 

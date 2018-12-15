@@ -3,6 +3,9 @@ package com.ruse.spread.data.world;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+
+import com.ruse.spread.GameConstants;
 
 import net.lintford.library.core.maths.RandomNumbers;
 import net.lintford.library.core.noise.ImprovedNoise;
@@ -16,23 +19,18 @@ public class World extends BaseData {
 
 	private static final long serialVersionUID = -4942760447159744932L;
 
-	// TODO: Add to world settings
-	public static final int WIDTH = 32;
-	public static final int HEIGHT = 32;
+	public static final int REGION_TYPE_CITY = 0b00000010;
+	public static final int REGION_TYPE_MINE = 0b00000100;
+	public static final int REGION_TYPE_FARM = 0b00001000;
 
-	public static final int NUM_CITIES = 4;
+	public static final int REGION_ID_NOTHING = 0b00000001;
+	public static final int REGION_ID_SPREAD = 0b00000010;
+	public static final int REGION_ID_NEUTRAL = 0b00000100;
 
-	public static final int TILE_SIZE = 64;
-
-	// TODO: Move these into the WorldNode class
-	public static final int TILE_TYPE_SPAWNER = 0b00000001;
-	public static final int TILE_TYPE_CITY = 0b00000010;
-	public static final int TILE_TYPE_MINE = 0b00000100;
-	public static final int TILE_TYPE_FARM = 0b00001000;
-
-	private static int region_index_counter = 0;
+	private static int region_index_counter;
 
 	public static final int INVALID_INDEX = -1;
+	public static final int INVALID_REGION = 0xffffffff;
 
 	// ---------------------------------------------
 	// Variables
@@ -40,20 +38,18 @@ public class World extends BaseData {
 
 	public final int width;
 	public final int height;
-	public int[] ground; // stores type and height
-	public int[] regions; // stores region ID
+	public int[] groundTileTypes; // stores type and height
+	public int[] groundHeight; // stores the ground height level for each tile
+	public int[] regionIDs; // stores region ID
 	public int[] timer; // variants/timers on tile animations
 	public int[] variants; // variants/timers on tile animations
+	public int[] spreadPopulation; // The number
 
-	public int[] spreaderDepth; // stores the depth of the spread at any one tile (region independent)
-	public int[] regionHealth; // Stores the health at this tile
-
+	private long mLastSeed = -1;
 	private ImprovedNoise mNoise;
 
 	public List<WorldRegion> mRegionInstances = new ArrayList<>();
 	public List<WorldContourLine> mWorldContours = new ArrayList<>();
-
-	public int mHQTileIndex;
 
 	// ---------------------------------------------
 	// Properties
@@ -103,26 +99,25 @@ public class World extends BaseData {
 	}
 
 	public boolean checkStillSpreader() {
-		final int lNumRegionsCount = mRegionInstances.size();
-		for (int i = 0; i < lNumRegionsCount; i++) {
-			if (mRegionInstances.get(i).type() == World.TILE_TYPE_SPAWNER)
+		for (int i = 0; i < width * height; i++) {
+			if (spreadPopulation[i] > 0)
 				return true;
 
 		}
 
 		return false;
+
 	}
 
-	public int getNumSpreaderRegions() {
-		int lReturnResult = 0;
-		final int lNumRegionsCount = mRegionInstances.size();
-		for (int i = 0; i < lNumRegionsCount; i++) {
-			if (mRegionInstances.get(i).type() == World.TILE_TYPE_SPAWNER)
-				lReturnResult++;
+	public int getSpreaderPopulation() {
+		int lNumSpreader = 0;
+
+		for (int i = 0; i < width * height; i++) {
+			lNumSpreader += spreadPopulation[i];
 
 		}
 
-		return lReturnResult;
+		return lNumSpreader;
 	}
 
 	// ---------------------------------------------
@@ -130,15 +125,18 @@ public class World extends BaseData {
 	// ---------------------------------------------
 
 	public World() {
-		width = WIDTH;
-		height = HEIGHT;
+		width = GameConstants.WIDTH;
+		height = GameConstants.HEIGHT;
 
-		ground = new int[width * height];
-		regions = new int[width * height];
-		spreaderDepth = new int[width * height];
-		regionHealth = new int[width * height];
+		groundTileTypes = new int[width * height];
+		groundHeight = new int[width * height];
+		regionIDs = new int[width * height];
+		spreadPopulation = new int[width * height];
 		variants = new int[width * height];
 		timer = new int[width * height];
+		
+		// Set a default seed
+		mLastSeed = 253556475200846L;
 
 	}
 
@@ -146,40 +144,42 @@ public class World extends BaseData {
 	// Methods
 	// ---------------------------------------------
 
-	public void generateNewWorld() {
-		Arrays.fill(ground, 0x0);
-		Arrays.fill(regions, 0x0);
-		Arrays.fill(spreaderDepth, 0x0);
-		Arrays.fill(regionHealth, 0x0);
+	public void generateNewWorld(boolean pNewSeed) {
+		Arrays.fill(groundTileTypes, 0x0);
+		Arrays.fill(groundHeight, 0x0);
+		Arrays.fill(regionIDs, 0x0);
 		Arrays.fill(timer, 0x0);
 		Arrays.fill(variants, 0x0);
+		Arrays.fill(spreadPopulation, 0); // number of spread here
 
 		region_index_counter = 1;
 
 		mRegionInstances.clear();
 		mWorldContours.clear();
 
-		mNoise = new ImprovedNoise(System.nanoTime());
+		if (mLastSeed == -1 || pNewSeed) {
+			mLastSeed = System.nanoTime();
+
+		}
+
+		mNoise = new ImprovedNoise(mLastSeed);
+		RandomNumbers.RANDOM = new Random(mLastSeed);
 
 		randomiseHeights();
-		assignTiles();
 
-		createSpawnerPositions();
 		createMapRegions();
 
 		generateContours();
 
-		// Get HQ Tileindex
-		mHQTileIndex = getHighestTile();
 		createStartingArea();
 
 	}
 
-	private int getHighestTile() {
+	public int getHighestTile() {
 		int lHighestPoint = 0;
 		int lHighestIndex = 0;
 		for (int i = 0; i < width * height; i++) {
-			int lHeight = WorldTile.getTileHeight(ground[i]);
+			int lHeight = groundHeight[i];
 			if (lHeight > lHighestPoint) {
 				lHighestPoint = lHeight;
 				lHighestIndex = i;
@@ -192,29 +192,31 @@ public class World extends BaseData {
 	}
 
 	private void createStartingArea() {
-		int lFarmTileIndex = getRandomWithinRange(mHQTileIndex, 4);
+		int lHQStartingArea = getHighestTile();
+
+		int lFarmTileIndex = getRandomWithinRange(lHQStartingArea, 4);
 		for (int i = 0; i < 5; i++) {
 			if (lFarmTileIndex != -1)
 				break;
 		}
 
 		if (lFarmTileIndex != -1)
-			createNewRegion(World.TILE_TYPE_FARM, lFarmTileIndex);
+			createNewRegion(World.REGION_TYPE_FARM, lFarmTileIndex);
 
-		int lMineTileIndex = getRandomWithinRange(mHQTileIndex, 4);
+		int lMineTileIndex = getRandomWithinRange(lHQStartingArea, 4);
 		for (int i = 0; i < 5; i++) {
 			if (lMineTileIndex != -1 && lMineTileIndex != lFarmTileIndex)
 				break;
 		}
 
 		if (lMineTileIndex != -1)
-			createNewRegion(World.TILE_TYPE_MINE, lMineTileIndex);
+			createNewRegion(World.REGION_TYPE_MINE, lMineTileIndex);
 
 	}
 
 	private int getRandomWithinRange(int pTileCoord, int pRange) {
-		int lTileX = pTileCoord % World.WIDTH;
-		int lTileY = pTileCoord / World.WIDTH;
+		int lTileX = pTileCoord % width;
+		int lTileY = pTileCoord / width;
 
 		int lHalfRange = pRange;
 
@@ -224,22 +226,22 @@ public class World extends BaseData {
 			int lNewX = lTileX + RandomNumbers.random(0, pRange * 2) - lHalfRange;
 			if (lNewX < 0)
 				lNewX = 0;
-			if (lNewX >= WIDTH)
-				lNewX = WIDTH - 1;
+			if (lNewX >= width)
+				lNewX = width - 1;
 
 			int lNewY = lTileY + RandomNumbers.random(0, pRange * 2) - lHalfRange;
 			if (lNewY < 0)
 				lNewY = 0;
-			if (lNewY >= HEIGHT)
-				lNewY = HEIGHT - 1;
+			if (lNewY >= height)
+				lNewY = height - 1;
 
-			int lSuggestedIndex = lNewY * World.WIDTH + lNewX;
+			int lSuggestedIndex = lNewY * width + lNewX;
 
-			if (lSuggestedIndex < 0 || lSuggestedIndex >= WIDTH * HEIGHT)
+			if (lSuggestedIndex < 0 || lSuggestedIndex >= width * height)
 				continue;
 
 			// Check regions collisions
-			if (regions[lSuggestedIndex] != 0x0)
+			if (regionIDs[lSuggestedIndex] != 0x0)
 				continue;
 
 			return lSuggestedIndex;
@@ -249,86 +251,42 @@ public class World extends BaseData {
 		return -1;
 	}
 
-	private void assignTiles() {
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				final int ti = y * width + x;
-				int tileHeight = WorldTile.getTileHeight(ground[ti]);
+	public List<Integer> createSpawnerPositions(int pNumberSpawns) {
+		List<Integer> lReturn = new ArrayList<>();
+		List<Integer> lOptions = new ArrayList<>();
 
-				if (tileHeight < 8) {
-					ground[ti] = (ground[ti] | WorldTile.TILE_TYPE_SAND);
-				} else if (tileHeight < 6) {
-					ground[ti] = (ground[ti] | WorldTile.TILE_TYPE_DIRT);
-				} else {
-					ground[ti] = (ground[ti] | WorldTile.TILE_TYPE_GRASS);
+		for (int i = 0; i < pNumberSpawns; i++) {
+			lOptions.clear();
+			int lLowestPoint = 99;
+			int lLowestIndex = -1;
+
+			// Top row
+			for (int j = 0; j < width; j++) {
+				int lHeight = groundHeight[j];
+				if (lHeight < lLowestPoint && !lReturn.contains(Integer.valueOf(j))) {
+					lLowestPoint = lHeight;
+					lOptions.add(j);
 				}
-
 			}
 
-		}
-
-	}
-
-	private void createSpawnerPositions() {
-		int lLowestPoint = 99;
-		int lLowestIndex = -1;
-
-		// Top row
-		for (int i = 0; i < width; i++) {
-			int lHeight = WorldTile.getTileHeight(ground[i]);
-			if (lHeight < lLowestPoint) {
-				lLowestPoint = lHeight;
-				lLowestIndex = i;
+			// Bottom row
+			for (int j = 0; j < width; j++) {
+				int ui = (width * height) - width + j;
+				int lHeight = groundHeight[ui];
+				if (lHeight < lLowestPoint && !lReturn.contains(Integer.valueOf(ui))) {
+					lLowestPoint = lHeight;
+					lOptions.add(ui);
+				}
 			}
+
+			if (lOptions.size() > 0)
+				lLowestIndex = lOptions.get(RandomNumbers.random(0, lOptions.size()));
+
+			if (lLowestIndex != -1)
+				lReturn.add(lLowestIndex);
 		}
 
-		if (lLowestIndex != -1)
-			createNewRegion(TILE_TYPE_SPAWNER, lLowestIndex);
-
-//		lLowestPoint = 99;
-//		lLowestIndex = -1;
-//
-//		// Left row
-//		for (int i = 0; i < width * height; i += width) {
-//			int lHeight = WorldTile.getTileHeight(ground[i]);
-//			if (lHeight < lLowestPoint) {
-//				lLowestPoint = lHeight;
-//				lLowestIndex = i;
-//			}
-//		}
-//
-//		if (lLowestIndex != -1)
-//			createNewRegion(TILE_TYPE_SPAWNER, lLowestIndex);
-//
-//		lLowestPoint = 99;
-//		lLowestIndex = -1;
-//
-//		// bottom row
-//		for (int i = width * height - width; i < width * height; i++) {
-//			int lHeight = WorldTile.getTileHeight(ground[i]);
-//			if (lHeight < lLowestPoint) {
-//				lLowestPoint = lHeight;
-//				lLowestIndex = i;
-//			}
-//		}
-//
-//		if (lLowestIndex != -1)
-//			createNewRegion(TILE_TYPE_SPAWNER, lLowestIndex);
-//
-//		lLowestPoint = 99;
-//		lLowestIndex = -1;
-//
-//		// right row
-//		for (int i = width - 1; i < width * height; i += width) {
-//			int lHeight = WorldTile.getTileHeight(ground[i]);
-//			if (lHeight < lLowestPoint) {
-//				lLowestPoint = lHeight;
-//				lLowestIndex = i;
-//			}
-//		}
-//
-//		if (lLowestIndex != -1)
-//			createNewRegion(TILE_TYPE_SPAWNER, lLowestIndex);
+		return lReturn;
 
 	}
 
@@ -337,12 +295,7 @@ public class World extends BaseData {
 
 		lNewRegion.tiles().add(pSpawnTileID);
 
-		regions[pSpawnTileID] = lNewRegion.uid();
-		regionHealth[pSpawnTileID] = 100;
-
-		if (pType == TILE_TYPE_SPAWNER) {
-			spreaderDepth[pSpawnTileID] = 1;
-		}
+		regionIDs[pSpawnTileID] = lNewRegion.uid();
 
 		mRegionInstances.add(lNewRegion);
 
@@ -352,13 +305,13 @@ public class World extends BaseData {
 
 	private void createMapRegions() {
 
-		for (int i = 0; i < NUM_CITIES; i++) {
+		for (int i = 0; i < GameConstants.NUM_CITIES; i++) {
 
 			int lNewCityTileIndex = -1;
 			boolean lFoundLocation = false;
 			for (int j = 0; j < 10; j++) {
 				lNewCityTileIndex = RandomNumbers.random(0, width * height - 1);
-				if (regions[lNewCityTileIndex] == 0x0) {
+				if (regionIDs[lNewCityTileIndex] == 0x0) {
 					lFoundLocation = true;
 					continue; // cannot build here, its taken
 
@@ -369,7 +322,7 @@ public class World extends BaseData {
 			if (!lFoundLocation)
 				continue;
 
-			createNewRegion(TILE_TYPE_CITY, lNewCityTileIndex);
+			createNewRegion(REGION_TYPE_CITY, lNewCityTileIndex);
 
 			if (RandomNumbers.getRandomChance(50)) { // MINE
 				for (int j = 0; j < 2; j++) {
@@ -381,12 +334,12 @@ public class World extends BaseData {
 					final int tileIndex = getRandomWithinRange(lNewCityTileIndex, 2);
 					if (tileIndex == -1)
 						continue;
-					if (regions[tileIndex] != 0x0) {
+					if (regionIDs[tileIndex] != 0x0) {
 						continue; // cannot build here, its taken
 
 					}
 
-					createNewRegion(TILE_TYPE_MINE, tileIndex);
+					createNewRegion(REGION_TYPE_MINE, tileIndex);
 
 				}
 
@@ -400,12 +353,12 @@ public class World extends BaseData {
 					final int tileIndex = getRandomWithinRange(lNewCityTileIndex, 2);
 					if (tileIndex == -1)
 						continue;
-					if (regions[tileIndex] != 0x0) {
+					if (regionIDs[tileIndex] != 0x0) {
 						continue;
 
 					}
 
-					createNewRegion(TILE_TYPE_FARM, tileIndex);
+					createNewRegion(REGION_TYPE_FARM, tileIndex);
 
 				}
 
@@ -424,7 +377,7 @@ public class World extends BaseData {
 				final int maxHeight = 16;
 
 				int tileHeight = (int) (mNoise.noise2(x * scale, y * scale) * maxHeight);
-				ground[ti] = (int) (tileHeight << 3);
+				groundHeight[ti] = tileHeight;
 
 			}
 
@@ -435,10 +388,10 @@ public class World extends BaseData {
 	public WorldRegion getRegionByTileindex(int pTileIndex) {
 		if (pTileIndex < 0 || pTileIndex > width * height - 1)
 			return null;
-		if (regions[pTileIndex] == 0x0)
+		if (regionIDs[pTileIndex] == 0x0)
 			return null;
 
-		return getRegionByUID(regions[pTileIndex]);
+		return getRegionByUID(regionIDs[pTileIndex]);
 
 	}
 
@@ -465,9 +418,7 @@ public class World extends BaseData {
 			for (int i = 0; i < lNumTiles; i++) {
 				int lTileIndex = lTileIndices.get(i);
 
-				regionHealth[lTileIndex] = 0;
-				spreaderDepth[lTileIndex] = 0;
-				regions[lTileIndex] = 0x0;
+				regionIDs[lTileIndex] = 0x0;
 
 			}
 
@@ -477,11 +428,10 @@ public class World extends BaseData {
 
 	}
 
-	// Each tile adds a line to the top or right
 	public void generateContours() {
 		boolean[] visited = new boolean[width * height];
 
-		final float lTileSize = World.TILE_SIZE;
+		final float lTileSize = GameConstants.TILE_SIZE;
 
 		float xOff = -width * lTileSize * 0.5f;
 		float yOff = -height * lTileSize * 0.5f;
@@ -492,7 +442,7 @@ public class World extends BaseData {
 				continue;
 
 			visited[i] = true;
-			int lCurrentHeight = WorldTile.getTileHeight(ground[i]);
+			int lCurrentHeight = groundHeight[i];
 
 			int topIndex = getTopTileIndex(i);
 
@@ -502,7 +452,7 @@ public class World extends BaseData {
 			float lPoint2Y = 0;
 
 			{ // top lines
-				if (topIndex == -1 || lCurrentHeight != WorldTile.getTileHeight(ground[topIndex])) { // on top left edge
+				if (topIndex == -1 || lCurrentHeight != groundHeight[topIndex]) { // on top left edge
 					// Start in top left
 					lPoint1X = (i % width) * lTileSize;
 					lPoint1Y = (i / width) * lTileSize;
@@ -515,7 +465,7 @@ public class World extends BaseData {
 						if (visited[j])
 							break;
 
-						if (lCurrentHeight != WorldTile.getTileHeight(ground[j]))
+						if (lCurrentHeight != groundHeight[j])
 							break;
 
 						visited[j] = true;
@@ -547,7 +497,7 @@ public class World extends BaseData {
 				continue;
 
 			visited[i] = true;
-			int lCurrentHeight = WorldTile.getTileHeight(ground[i]);
+			int lCurrentHeight = groundHeight[i];
 
 			int leftIndex = getLeftTileIndex(i);
 
@@ -557,7 +507,7 @@ public class World extends BaseData {
 			float lPoint2Y = 0;
 
 			{ // left lines
-				if ((leftIndex == -1 || lCurrentHeight != WorldTile.getTileHeight(ground[leftIndex]))) {
+				if ((leftIndex == -1 || lCurrentHeight != groundHeight[leftIndex])) {
 					// Start in top left
 					lPoint1X = (i % width) * lTileSize;
 					lPoint1Y = (i / width) * lTileSize;
@@ -570,13 +520,12 @@ public class World extends BaseData {
 						if (visited[j])
 							break;
 
-						int lDownHeight = WorldTile.getTileHeight(ground[j]);
+						int lDownHeight = groundHeight[j];
 
 						int lDownLeftIndex = getLeftTileIndex(j);
 						int lDownLeftHeight = lDownHeight;
 						if (lDownLeftIndex != -1) {
-							lDownLeftHeight = WorldTile.getTileHeight(ground[lDownLeftIndex]);
-							;
+							lDownLeftHeight = groundHeight[lDownLeftIndex];
 
 						}
 
@@ -609,37 +558,37 @@ public class World extends BaseData {
 	}
 
 	public float getWorldPositionX(int pTileIndex) {
-		float xOff = -World.WIDTH * 0.5f * World.TILE_SIZE;
-		float xPos = pTileIndex % World.WIDTH * World.TILE_SIZE;
+		float xOff = -width * 0.5f * GameConstants.TILE_SIZE;
+		float xPos = pTileIndex % width * GameConstants.TILE_SIZE;
 
 		return xOff + xPos;
 	}
 
 	public float getWorldPositionY(int pTileIndex) {
-		float yOff = -World.HEIGHT * 0.5f * World.TILE_SIZE;
-		float yPos = pTileIndex / World.WIDTH * World.TILE_SIZE;
+		float yOff = -height * 0.5f * GameConstants.TILE_SIZE;
+		float yPos = pTileIndex / width * GameConstants.TILE_SIZE;
 
 		return yOff + yPos;
 	}
 
 	public int getTileFromWorldPosition(float pXPos, float pYPos) {
-		float xOff = -World.WIDTH * 0.5f * World.TILE_SIZE;
-		float yOff = -World.HEIGHT * 0.5f * World.TILE_SIZE;
+		float xOff = -width * 0.5f * GameConstants.TILE_SIZE;
+		float yOff = -height * 0.5f * GameConstants.TILE_SIZE;
 
-		int lGridX = (int) (-xOff + pXPos) / World.TILE_SIZE;
-		int lGridY = (int) (-yOff + pYPos) / World.TILE_SIZE;
+		int lGridX = (int) (-xOff + pXPos) / GameConstants.TILE_SIZE;
+		int lGridY = (int) (-yOff + pYPos) / GameConstants.TILE_SIZE;
 
 		if (lGridX < 0)
 			lGridX = 0;
-		if (lGridX >= World.WIDTH)
-			lGridX = World.WIDTH - 1;
+		if (lGridX >= width)
+			lGridX = width - 1;
 
 		if (lGridY < 0)
 			lGridY = 0;
-		if (lGridY > World.HEIGHT)
-			lGridY = World.HEIGHT - 1;
+		if (lGridY > height)
+			lGridY = height - 1;
 
-		return lGridY * World.WIDTH + lGridX;
+		return lGridY * width + lGridX;
 	}
 
 }

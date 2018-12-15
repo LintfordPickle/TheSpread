@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ruse.spread.data.PooledInstanceData;
+import com.ruse.spread.data.world.nodes.WorldNode;
 
 import net.lintford.library.core.geometry.Rectangle;
 

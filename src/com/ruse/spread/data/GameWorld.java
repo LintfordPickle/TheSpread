@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import com.ruse.spread.GameConstants;
 import com.ruse.spread.data.projectile.ProjectileManager;
 import com.ruse.spread.data.world.World;
 import com.ruse.spread.data.world.WorldEdge;
-import com.ruse.spread.data.world.WorldNode;
 import com.ruse.spread.data.world.WorldPackage;
+import com.ruse.spread.data.world.nodes.WorldNode;
 
 import net.lintford.library.data.BaseData;
 
@@ -27,7 +28,7 @@ public class GameWorld extends BaseData {
 			}
 			return 0;
 		}
-		
+
 	}
 
 	public class PathingNode {
@@ -35,6 +36,7 @@ public class GameWorld extends BaseData {
 		public boolean visited;
 		public float currentCost;
 		public float aggCost;
+		public int aggLinkCount;
 		public PathingNode prevNode;
 
 		public PathingNode(WorldNode pNode) {
@@ -46,6 +48,8 @@ public class GameWorld extends BaseData {
 			aggCost = Integer.MAX_VALUE;
 			prevNode = null;
 			visited = false;
+			aggLinkCount = 0;
+
 		}
 
 	}
@@ -120,6 +124,85 @@ public class GameWorld extends BaseData {
 		return null;
 	}
 
+	public int getWorldPop() {
+		int result = 0;
+		final int lNodeCount = mNodeInstances.size();
+		for (int i = 0; i < lNodeCount; i++) {
+			result += mNodeInstances.get(i).populationStore;
+
+		}
+
+		return result;
+	}
+
+	public int getMaxWorldPop() {
+		int result = 0;
+		final int lNodeCount = mNodeInstances.size();
+		for (int i = 0; i < lNodeCount; i++) {
+			result += mNodeInstances.get(i).storageCapacityPopulation;
+
+		}
+
+		return result;
+	}
+
+	public int getWorldFood() {
+		int result = 0;
+		final int lNodeCount = mNodeInstances.size();
+		for (int i = 0; i < lNodeCount; i++) {
+			result += mNodeInstances.get(i).foodStore;
+
+		}
+
+		return result;
+	}
+
+	public int getMaxFood() {
+		int result = 0;
+		final int lNodeCount = mNodeInstances.size();
+		for (int i = 0; i < lNodeCount; i++) {
+			result += mNodeInstances.get(i).storageCapacityFood;
+
+		}
+
+		return result;
+	}
+
+	public int getWorldMetal() {
+		int result = 0;
+		final int lNodeCount = mNodeInstances.size();
+		for (int i = 0; i < lNodeCount; i++) {
+			result += mNodeInstances.get(i).metalStore;
+
+		}
+
+		return result;
+	}
+
+	public int getMaxMetal() {
+		int result = 0;
+		final int lNodeCount = mNodeInstances.size();
+		for (int i = 0; i < lNodeCount; i++) {
+			result += mNodeInstances.get(i).storageCapacityMetal;
+
+		}
+
+		return result;
+	}
+
+	// The game of the game has become to destory the spread nodes !
+	public int numSpreadSpawns() {
+		int result = 0;
+		final int lNodeCount = mNodeInstances.size();
+		for (int i = 0; i < lNodeCount; i++) {
+			if (mNodeInstances.get(i).mTeamID == WorldNode.TEAM_ID_ENEMY)
+				result += 1;
+
+		}
+
+		return result;
+	}
+
 	// ---------------------------------------------
 	// Constructor
 	// ---------------------------------------------
@@ -135,7 +218,7 @@ public class GameWorld extends BaseData {
 	// Methods
 	// ---------------------------------------------
 
-	public void generateNewWorld() {
+	public void generateNewWorld(boolean pNewSeed) {
 		mNodeInstances.clear();
 		mEdgeInstances.clear();
 		mPackageInstances.clear();
@@ -144,9 +227,10 @@ public class GameWorld extends BaseData {
 
 		assignPackagesToPool(200);
 
-		mWorld.generateNewWorld();
+		mWorld.generateNewWorld(pNewSeed);
 
 		createHQ();
+		createSpawnNodes();
 
 		mGameState.startNewGame();
 
@@ -156,7 +240,7 @@ public class GameWorld extends BaseData {
 		mHQNode = new WorldNode();
 
 		mHQNode.setNodeType(WorldNode.NODE_TYPE_HQ);
-		mHQNode.tileIndex = mWorld.mHQTileIndex;
+		mHQNode.tileIndex = mWorld.getHighestTile();
 		mHQNode.isConstructed = true;
 		mHQNode.nodeEnabled = true;
 
@@ -166,6 +250,23 @@ public class GameWorld extends BaseData {
 
 		addNewWorldNode(mHQNode);
 
+	}
+
+	public void createSpawnNodes() {
+
+		final int lNumSpawns = 3;
+		List<Integer> spawnTiles = mWorld.createSpawnerPositions(lNumSpawns);
+		for (int i = 0; i < lNumSpawns; i++) {
+			WorldNode lSpreadSpawnerNode = new WorldNode();
+
+			lSpreadSpawnerNode.setNodeType(WorldNode.NODE_TYPE_SPREADER);
+			lSpreadSpawnerNode.tileIndex = spawnTiles.get(i);
+			lSpreadSpawnerNode.isConstructed = true;
+			lSpreadSpawnerNode.nodeEnabled = true;
+
+			addNewWorldNode(lSpreadSpawnerNode);
+
+		}
 	}
 
 	public void loadFromFile(String pFilename) {
@@ -230,7 +331,7 @@ public class GameWorld extends BaseData {
 		float xPos = mWorld.getWorldPositionX(pNewNode.tileIndex);
 		float yPos = mWorld.getWorldPositionY(pNewNode.tileIndex);
 
-		pNewNode.mBounds.set(xPos, yPos, World.TILE_SIZE, World.TILE_SIZE);
+		pNewNode.mBounds.set(xPos, yPos, GameConstants.TILE_SIZE, GameConstants.TILE_SIZE);
 
 	}
 

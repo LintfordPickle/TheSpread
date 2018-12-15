@@ -1,4 +1,4 @@
-package com.ruse.spread.screenmanager.screens;
+package com.ruse.spread.screens;
 
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.graphics.ResourceManager;

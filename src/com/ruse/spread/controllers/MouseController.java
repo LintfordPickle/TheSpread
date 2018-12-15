@@ -1,6 +1,6 @@
 package com.ruse.spread.controllers;
 
-import com.ruse.spread.data.world.WorldNode;
+import com.ruse.spread.data.world.nodes.WorldNode;
 
 import net.lintford.library.controllers.BaseController;
 import net.lintford.library.controllers.core.ControllerManager;

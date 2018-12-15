@@ -1,9 +1,12 @@
-package com.ruse.spread.data.world;
+package com.ruse.spread.data.world.nodes;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ruse.spread.GameConstants;
 import com.ruse.spread.data.PooledInstanceData;
+import com.ruse.spread.data.world.WorldEdge;
+import com.ruse.spread.data.world.WorldPackage;
 import com.ruse.spread.data.world.WorldPackage.PACKAGETYPE;
 
 import net.lintford.library.core.geometry.Rectangle;
@@ -29,7 +32,13 @@ public class WorldNode extends PooledInstanceData {
 	public static final int NODE_TYPE_TURRET = 0b01000000;
 	public static final int NODE_TYPE_MORTAR = 0b10000000;
 
+	// Enemy Nodes
+	public static final int NODE_TYPE_SPREADER = 0b0000000100000000;
+
 	public static final int MAX_HEALTH = 100;
+
+	public static final int TEAM_ID_PLAYER = 0x1;
+	public static final int TEAM_ID_ENEMY = 0x2;
 
 	// ---------------------------------------------
 	// Variables
@@ -41,6 +50,8 @@ public class WorldNode extends PooledInstanceData {
 	public boolean isConstructed;
 
 	public String name;
+
+	public int mTeamID;
 
 	public int neededPop;
 	public int neededFood;
@@ -67,6 +78,7 @@ public class WorldNode extends PooledInstanceData {
 	public int maintainMinimumPop;
 
 	public int health;
+	public float angle;
 
 	public boolean provider;
 	public boolean storage;
@@ -97,7 +109,7 @@ public class WorldNode extends PooledInstanceData {
 	// ---------------------------------------------
 
 	public WorldNode() {
-		mBounds.set(0, 0, World.TILE_SIZE, World.TILE_SIZE);
+		mBounds.set(0, 0, GameConstants.TILE_SIZE, GameConstants.TILE_SIZE);
 		name = "empty";
 	}
 
@@ -218,10 +230,35 @@ public class WorldNode extends PooledInstanceData {
 
 	public void setNodeType(int pNodeType) {
 		nodeType = pNodeType;
+		
+		populationStore = 0;
+		metalStore = 0;
+		foodStore = 0;
+		
 		switch (nodeType) {
+		case NODE_TYPE_SPREADER:
+			mTeamID = TEAM_ID_ENEMY;
+			name = "Spread Spawner";
+			maxDistanceBetweenNodes = 0;
+			storageCapacityFood = 0;
+			storageCapacityMetal = 0;
+			storageCapacityPopulation = 0;
+			maintainMinimumPop = 0;
+			storageCapacityAmmo = 0;
+			ammoPerMetal = 0;
+			provider = false;
+			storage = false;
+			health = MAX_HEALTH;
+
+			neededPop = 0;
+			neededFood = 0;
+			neededMetals = 0;
+			break;
+
 		case NODE_TYPE_HQ:
+			mTeamID = TEAM_ID_PLAYER;
 			name = "HQ";
-			maxDistanceBetweenNodes = World.TILE_SIZE * 3;
+			maxDistanceBetweenNodes = GameConstants.TILE_SIZE * 5;
 			storageCapacityFood = 30;
 			storageCapacityMetal = 30;
 			storageCapacityPopulation = 30;
@@ -238,8 +275,9 @@ public class WorldNode extends PooledInstanceData {
 			break;
 
 		case NODE_TYPE_NORMAL:
+			mTeamID = TEAM_ID_PLAYER;
 			name = "Node";
-			maxDistanceBetweenNodes = World.TILE_SIZE * 3;
+			maxDistanceBetweenNodes = GameConstants.TILE_SIZE * 4;
 			storageCapacityFood = 2;
 			storageCapacityMetal = 2;
 			storageCapacityPopulation = 2;
@@ -252,12 +290,13 @@ public class WorldNode extends PooledInstanceData {
 
 			neededPop = 0;
 			neededFood = 0;
-			neededMetals = 10;
+			neededMetals = 7;
 			break;
 
 		case NODE_TYPE_LONG:
+			mTeamID = TEAM_ID_PLAYER;
 			name = "Long Node";
-			maxDistanceBetweenNodes = World.TILE_SIZE * 5;
+			maxDistanceBetweenNodes = GameConstants.TILE_SIZE * 6;
 			storageCapacityFood = 2;
 			storageCapacityMetal = 2;
 			storageCapacityPopulation = 2;
@@ -271,12 +310,13 @@ public class WorldNode extends PooledInstanceData {
 
 			neededPop = 0;
 			neededFood = 0;
-			neededMetals = 25;
+			neededMetals = 17;
 			break;
 
 		case NODE_TYPE_STORAGE:
+			mTeamID = TEAM_ID_PLAYER;
 			name = "Storage Node";
-			maxDistanceBetweenNodes = World.TILE_SIZE * 3;
+			maxDistanceBetweenNodes = GameConstants.TILE_SIZE * 4;
 			storageCapacityFood = 20;
 			storageCapacityMetal = 20;
 			storageCapacityPopulation = 7;
@@ -289,13 +329,14 @@ public class WorldNode extends PooledInstanceData {
 
 			neededPop = 0;
 			neededFood = 0;
-			neededMetals = 25;
+			neededMetals = 20;
 			break;
 
 		case NODE_TYPE_PILLBOX:
+			mTeamID = TEAM_ID_PLAYER;
 			name = "Pillbox";
-			maxDistanceBetweenNodes = World.TILE_SIZE * 3;
-			storageCapacityFood = 5;
+			maxDistanceBetweenNodes = GameConstants.TILE_SIZE * 3;
+			storageCapacityFood = 0;
 			storageCapacityMetal = 5;
 			storageCapacityPopulation = 5;
 			maintainMinimumPop = 5;
@@ -315,8 +356,9 @@ public class WorldNode extends PooledInstanceData {
 			break;
 
 		case NODE_TYPE_TURRET:
+			mTeamID = TEAM_ID_PLAYER;
 			name = "Turret";
-			maxDistanceBetweenNodes = World.TILE_SIZE * 3;
+			maxDistanceBetweenNodes = GameConstants.TILE_SIZE * 3;
 			storageCapacityFood = 0;
 			storageCapacityMetal = 10;
 			storageCapacityPopulation = 4;
@@ -337,8 +379,9 @@ public class WorldNode extends PooledInstanceData {
 			break;
 
 		case NODE_TYPE_MORTAR:
+			mTeamID = TEAM_ID_PLAYER;
 			name = "Mortar";
-			maxDistanceBetweenNodes = World.TILE_SIZE * 3;
+			maxDistanceBetweenNodes = GameConstants.TILE_SIZE * 3;
 			storageCapacityFood = 0;
 			storageCapacityMetal = 10;
 			storageCapacityPopulation = 6;

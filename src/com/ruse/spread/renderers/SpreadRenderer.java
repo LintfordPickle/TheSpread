@@ -1,35 +1,30 @@
 package com.ruse.spread.renderers;
 
-import java.util.List;
-
-import org.lwjgl.opengl.GL11;
-
 import com.ruse.spread.GameConstants;
 import com.ruse.spread.controllers.WorldController;
-import com.ruse.spread.data.world.WorldContourLine;
 
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.graphics.ResourceManager;
-import net.lintford.library.core.graphics.linebatch.LineBatch;
 import net.lintford.library.core.graphics.textures.Texture;
 import net.lintford.library.core.graphics.textures.TextureManager;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
-import net.lintford.library.core.maths.Vector3f;
+import net.lintford.library.core.maths.RandomNumbers;
 import net.lintford.library.renderers.BaseRenderer;
 import net.lintford.library.renderers.RendererManager;
 
-public class WorldRenderer extends BaseRenderer {
+public class SpreadRenderer extends BaseRenderer {
 
 	// ---------------------------------------------
 	// Constants
 	// ---------------------------------------------
 
-	public static final String RENDERER_NAME = "WorldRenderer";
+	public static final String RENDERER_NAME = "SpreadRenderer";
 
-	public static Vector3f DIRT_COLOR = new Vector3f(124f / 255f, 75f / 255f, 42f / 255f);
-	public static Vector3f GRASS_COLOR = new Vector3f(54f / 255f, 104f / 255f, 59f / 255f);
-	public static Vector3f SAND_COLOR = new Vector3f(165f / 255f, 146f / 255f, 71f / 255f);
+	@Override
+	public int ZDepth() {
+		return 4;
+	}
 
 	// ---------------------------------------------
 	// Variables
@@ -37,21 +32,13 @@ public class WorldRenderer extends BaseRenderer {
 
 	private WorldController mWorldController;
 	private Texture mGroundTexture;
-	TextureBatch mGroundTextureBatch;
-
-	@Override
-	public int ZDepth() {
-		return 2;
-	}
 
 	// ---------------------------------------------
 	// Constructor
 	// ---------------------------------------------
 
-	public WorldRenderer(RendererManager pRendererManager, int pGroupID) {
+	public SpreadRenderer(RendererManager pRendererManager, int pGroupID) {
 		super(pRendererManager, RENDERER_NAME, pGroupID);
-
-		mGroundTextureBatch = new TextureBatch();
 
 	}
 
@@ -72,23 +59,12 @@ public class WorldRenderer extends BaseRenderer {
 		super.loadGLContent(pResourceManager);
 
 		mGroundTexture = TextureManager.textureManager().loadTexture("GameTexture", "res/textures/game.png");
-		mGroundTextureBatch.loadGLContent(pResourceManager);
-
-	}
-
-	@Override
-	public void unloadGLContent() {
-		super.unloadGLContent();
-
-		mGroundTextureBatch.unloadGLContent();
 
 	}
 
 	@Override
 	public void draw(LintfordCore pCore) {
-
-		drawGround(pCore);
-		drawContours(pCore);
+		drawRegions(pCore);
 
 	}
 
@@ -96,55 +72,50 @@ public class WorldRenderer extends BaseRenderer {
 	// Methods
 	// ---------------------------------------------
 
-	private void drawGround(LintfordCore pCore) {
+	private void drawRegions(LintfordCore pCore) {
 		int width = mWorldController.gameWorld().world().width;
 		int height = mWorldController.gameWorld().world().height;
-		int[] lGroundHeights = mWorldController.gameWorld().world().groundHeight;
+		int[] spreadPopulation = mWorldController.gameWorld().world().spreadPopulation;
+		int[] timer = mWorldController.gameWorld().world().timer;
+		int[] variations = mWorldController.gameWorld().world().variants;
 
 		TextureBatch lTextureBatch = mRendererManager.uiTextureBatch();
 
 		lTextureBatch.begin(pCore.gameCamera());
-		mGroundTextureBatch.begin(pCore.gameCamera());
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				final int ti = y * width + x;
-				Vector3f tileColor = SAND_COLOR;
+				if (spreadPopulation[ti] == 0x0)
+					continue; // no spread here
 
-				final float maxDepth = 16f;
+				float lR = 1f;
+				float lG = 0f;
+				float lB = 0f;
+				float lA = 1f;
+
+				float srcX = 0;
+				float srcY = 0;
+
+				timer[ti]--;
+				if (timer[ti] <= 0) {
+					variations[ti] = (int) (RandomNumbers.getRandomChance(2) ? RandomNumbers.random(0, 6) * 32 : 0f);
+					timer[ti] = 128; // frames
+				}
+
 				final int tileSize = GameConstants.TILE_SIZE;
-				final float dAmt = lGroundHeights[ti] / (maxDepth * 0.5f);
 
 				final float xOff = -width * tileSize * 0.5f;
 				final float yOff = -height * tileSize * 0.5f;
 
-				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 0, 0, 32, 32, xOff + x * tileSize, yOff + y * tileSize, tileSize, tileSize, -0.3f, tileColor.x * dAmt, tileColor.y * dAmt, tileColor.z * dAmt, 1f);
-				mGroundTextureBatch.draw(mGroundTexture, 0, 0, 32, 32, xOff + x * tileSize, yOff + y * tileSize, tileSize, tileSize, -0.3f, tileColor.x * dAmt, tileColor.y * dAmt, tileColor.z * dAmt, 0.8f);
+				lTextureBatch.draw(mGroundTexture, srcX + variations[ti], srcY, 32, 32, xOff + x * tileSize, yOff + y * tileSize, tileSize, tileSize, -0.2f, lR, lG, lB, lA);
 
 			}
+
 		}
 
 		lTextureBatch.end();
-		mGroundTextureBatch.end();
-	}
 
-	private void drawContours(LintfordCore pCore) {
-		List<WorldContourLine> lLines = mWorldController.gameWorld().world().mWorldContours;
-
-		GL11.glLineWidth(1);
-
-		LineBatch lLineBatch = mRendererManager.uiLineBatch();
-
-		final int lLineCount = lLines.size();
-		lLineBatch.begin(pCore.gameCamera());
-		for (int i = 0; i < lLineCount; i++) {
-			WorldContourLine lLine = lLines.get(i);
-			float pAmt = 0f;
-			lLineBatch.a = 1f / lLine.height * 1f;
-			lLineBatch.draw(lLine.start.x, lLine.start.y, lLine.end.x, lLine.end.y, -0.3f, pAmt, pAmt, pAmt);
-
-		}
-		lLineBatch.end();
 	}
 
 }

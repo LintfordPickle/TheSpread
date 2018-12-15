@@ -25,7 +25,7 @@ public class MineRegion extends WorldRegion {
 	// ---------------------------------------------
 
 	public MineRegion(int pUID) {
-		super(pUID, World.TILE_TYPE_MINE);
+		super(pUID, World.REGION_TYPE_MINE);
 
 		name = "Mine";
 

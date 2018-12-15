@@ -2,11 +2,11 @@ package com.ruse.spread.controllers;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.ruse.spread.GameConstants;
 import com.ruse.spread.data.GameState;
 import com.ruse.spread.data.world.World;
 
 import net.lintford.library.controllers.BaseController;
-import net.lintford.library.controllers.camera.CameraController;
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
 
@@ -24,9 +24,9 @@ public class GameStateController extends BaseController {
 
 	private GameState mGameState;
 	private WorldController mWorldController;
-	private CameraController mCameraController;
 	private CameraBoundController mCameraBoundController;
 
+	private boolean mGameWon;
 	private boolean mIsGameEnded;
 
 	// ---------------------------------------------
@@ -35,6 +35,10 @@ public class GameStateController extends BaseController {
 
 	public boolean isGameEnded() {
 		return mIsGameEnded;
+	}
+
+	public boolean isGameWon() {
+		return mGameWon;
 	}
 
 	public GameState gameState() {
@@ -62,7 +66,6 @@ public class GameStateController extends BaseController {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
 		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mGroupID);
-		mCameraController = (CameraController) lControllerManager.getControllerByNameRequired(CameraController.CONTROLLER_NAME, LintfordCore.CORE_ID);
 		mCameraBoundController = (CameraBoundController) lControllerManager.getControllerByNameRequired(CameraBoundController.CONTROLLER_NAME, mGroupID);
 
 	}
@@ -70,7 +73,15 @@ public class GameStateController extends BaseController {
 	@Override
 	public boolean handleInput(LintfordCore pCore) {
 		if (pCore.input().keyDownTimed(GLFW.GLFW_KEY_R)) {
-			mIsGameEnded = true;
+//			mNewSeed = false;
+//			mIsGameEnded = true;
+			startNewGame(false);
+
+		}
+		if (pCore.input().keyDownTimed(GLFW.GLFW_KEY_N)) {
+//			mNewSeed = true;
+//			mIsGameEnded = true;
+			startNewGame(true);
 
 		}
 
@@ -100,7 +111,8 @@ public class GameStateController extends BaseController {
 		}
 
 		// Check for game won
-		if (!mWorldController.gameWorld().world().checkStillSpreader()) {
+		if (mWorldController.gameWorld().numSpreadSpawns() <= 0) {
+			mGameWon = true;
 			mIsGameEnded = true;
 		}
 
@@ -110,7 +122,13 @@ public class GameStateController extends BaseController {
 
 		// Check for game ended flag from other sources (HQ destroyed , below)
 		if (mIsGameEnded) {
-			startNewGame();
+			if (mGameWon) {
+				// Game won
+
+			} else {
+				// Game lost
+
+			}
 
 		}
 
@@ -120,8 +138,8 @@ public class GameStateController extends BaseController {
 	// Methods
 	// ---------------------------------------------
 
-	public void startNewGame() {
-		mWorldController.gameWorld().generateNewWorld();
+	public void startNewGame(boolean pNewSeed) {
+		mWorldController.gameWorld().generateNewWorld(pNewSeed);
 		mGameState.startNewGame();
 
 		final World lWorld = mWorldController.gameWorld().world();
@@ -130,14 +148,13 @@ public class GameStateController extends BaseController {
 		float StartX = lWorld.getWorldPositionX(lHQNodeTileIndex);
 		float StartY = lWorld.getWorldPositionY(lHQNodeTileIndex);
 
-		mCameraBoundController.setup(StartX, StartY, -lWorld.width / 2f * World.TILE_SIZE, -lWorld.height / 2f * World.TILE_SIZE, lWorld.width * World.TILE_SIZE, lWorld.height * World.TILE_SIZE);
+		mCameraBoundController.setup(StartX, StartY, -lWorld.width / 2f * GameConstants.TILE_SIZE, -lWorld.height / 2f * GameConstants.TILE_SIZE, lWorld.width * GameConstants.TILE_SIZE, lWorld.height * GameConstants.TILE_SIZE);
 
 		mIsGameEnded = false;
 	}
 
 	public void HQDestroyed() {
-		// TODO: LOSE CONDITION MET
-
+		mGameWon = false;
 		mIsGameEnded = true;
 
 	}
