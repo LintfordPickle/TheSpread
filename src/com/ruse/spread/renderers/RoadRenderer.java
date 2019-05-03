@@ -54,7 +54,7 @@ public class RoadRenderer extends BaseRenderer {
 	public void initialise(LintfordCore pCore) {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
-		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mEntityID);
+		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, entityGroupID());
 
 	}
 

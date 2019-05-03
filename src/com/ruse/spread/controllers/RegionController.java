@@ -40,8 +40,8 @@ public class RegionController extends BaseController {
 	// Constructor
 	// ---------------------------------------------
 
-	public RegionController(ControllerManager pControllerManager, int pGroupID) {
-		super(pControllerManager, CONTROLLER_NAME, pGroupID);
+	public RegionController(ControllerManager pControllerManager, int pEntityGroupID) {
+		super(pControllerManager, CONTROLLER_NAME, pEntityGroupID);
 
 	}
 
@@ -53,7 +53,7 @@ public class RegionController extends BaseController {
 	public void initialise(LintfordCore pCore) {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
-		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mGroupID);
+		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, entityGroupID());
 
 	}
 

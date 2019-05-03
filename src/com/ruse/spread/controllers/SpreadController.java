@@ -44,8 +44,8 @@ public class SpreadController extends BaseController {
 	// Constructor
 	// ---------------------------------------------
 
-	public SpreadController(ControllerManager pControllerManager, int pGroupID) {
-		super(pControllerManager, CONTROLLER_NAME, pGroupID);
+	public SpreadController(ControllerManager pControllerManager, int pEntityGroupID) {
+		super(pControllerManager, CONTROLLER_NAME, pEntityGroupID);
 
 		mEnableSpread = true;
 
@@ -59,8 +59,8 @@ public class SpreadController extends BaseController {
 	public void initialise(LintfordCore pCore) {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
-		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mGroupID);
-		mNodeController = (NodeController) lControllerManager.getControllerByNameRequired(NodeController.CONTROLLER_NAME, mGroupID);
+		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, entityGroupID());
+		mNodeController = (NodeController) lControllerManager.getControllerByNameRequired(NodeController.CONTROLLER_NAME, entityGroupID());
 
 	}
 

@@ -59,8 +59,8 @@ public class CameraBoundController extends BaseController {
 	// Constructor
 	// ---------------------------------------------
 
-	public CameraBoundController(ControllerManager pControllerManager, ICamera pCamera, WorldEntity pTrackEntity, int pControllerGroup) {
-		super(pControllerManager, CONTROLLER_NAME, pControllerGroup);
+	public CameraBoundController(ControllerManager pControllerManager, ICamera pCamera, WorldEntity pTrackEntity, int pEntityGroupID) {
+		super(pControllerManager, CONTROLLER_NAME, pEntityGroupID);
 
 		mGameCamera = pCamera;
 		mBounds = new Rectangle();

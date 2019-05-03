@@ -29,8 +29,8 @@ public class PackageController extends BaseController {
 	// Constructor
 	// ---------------------------------------------
 
-	public PackageController(ControllerManager pControllerManager, int pGroupID) {
-		super(pControllerManager, CONTROLLER_NAME, pGroupID);
+	public PackageController(ControllerManager pControllerManager, int pEntityGroupID) {
+		super(pControllerManager, CONTROLLER_NAME, pEntityGroupID);
 
 	}
 

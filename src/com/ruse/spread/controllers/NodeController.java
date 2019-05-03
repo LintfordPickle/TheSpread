@@ -73,8 +73,8 @@ public class NodeController extends BaseController {
 	// Constructor
 	// ---------------------------------------------
 
-	public NodeController(ControllerManager pControllerManager, int pGroupID) {
-		super(pControllerManager, CONTROLLER_NAME, pGroupID);
+	public NodeController(ControllerManager pControllerManager, int pEntityGroupID) {
+		super(pControllerManager, CONTROLLER_NAME, pEntityGroupID);
 
 	}
 
@@ -86,9 +86,9 @@ public class NodeController extends BaseController {
 	public void initialise(LintfordCore pCore) {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
-		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mGroupID);
-		mGameStateController = (GameStateController) lControllerManager.getControllerByNameRequired(GameStateController.CONTROLLER_NAME, mGroupID);
-		mProjectileController = (ParticleController) lControllerManager.getControllerByNameRequired(ParticleController.CONTROLLER_NAME, mGroupID);
+		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, entityGroupID());
+		mGameStateController = (GameStateController) lControllerManager.getControllerByNameRequired(GameStateController.CONTROLLER_NAME, entityGroupID());
+		mProjectileController = (ParticleController) lControllerManager.getControllerByNameRequired(ParticleController.CONTROLLER_NAME, entityGroupID());
 
 	}
 

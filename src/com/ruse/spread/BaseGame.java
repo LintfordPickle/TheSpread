@@ -9,6 +9,7 @@ import net.lintford.library.ConstantsTable;
 import net.lintford.library.GameInfo;
 import net.lintford.library.core.LintfordCore;
 import net.lintford.library.core.debug.Debug;
+import net.lintford.library.core.graphics.textures.Texture;
 import net.lintford.library.core.graphics.textures.TextureManager;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
 import net.lintford.library.screenmanager.IMenuAction;
@@ -67,12 +68,9 @@ public class BaseGame extends LintfordCore {
 	protected void onInitialiseApp() {
 		super.onInitialiseApp();
 
-		// TODO: preload textures
-		TextureManager.TEXTURE_CORE_UI.reloadTexture("res/textures/core/system.png");
-		TextureManager.textureManager().loadTexture(LoadingScreen.LOADING_BACKGROUND_TEXTURE_NAME, "res/textures/screens/loading.png", GL11.GL_NEAREST, true);
-
-		// Load fonts
-		mResourceManager.fontManager().loadNewFont(GAME_FONT_NAME, GAME_FONT_LOCATION, 16);
+		// Reload the default engine textures
+		mResourceManager.textureManager().loadTexture(TextureManager.TEXTURE_CORE_UI_NAME, "res/textures/core/system.png", GL11.GL_NEAREST, true, CORE_ENTITY_GROUP_ID);
+		mResourceManager.textureManager().loadTexture(LoadingScreen.LOADING_BACKGROUND_TEXTURE_NAME, "res/textures/screens/loading.png", GL11.GL_NEAREST, true, CORE_ENTITY_GROUP_ID);
 
 		if (SHOW_INTRO) {
 			TimedIntroScreen lSplashScreen = new TimedIntroScreen(mScreenManager, "res/textures/screens/splash.png", 4f);
@@ -109,6 +107,9 @@ public class BaseGame extends LintfordCore {
 	@Override
 	protected void onLoadGLContent() {
 		super.onLoadGLContent();
+		
+		// Load game font
+		mResourceManager.fontManager().loadNewFont(GAME_FONT_NAME, GAME_FONT_LOCATION, 16, CORE_ENTITY_GROUP_ID);
 
 		mScreenManager.loadGLContent(mResourceManager);
 		mTextureBatch.loadGLContent(mResourceManager);
@@ -147,8 +148,10 @@ public class BaseGame extends LintfordCore {
 		float lCursorX = HUD().getMouseWorldSpaceX();
 		float lCursorY = HUD().getMouseWorldSpaceY();
 
+		Texture lCoreTexture = mResourceManager.textureManager().textureCore();
+		
 		mTextureBatch.begin(HUD());
-		mTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 256, 0, 32, 32, lCursorX, lCursorY, 32, 32, -0.01f, 1f, 1f, 1f, 1f);
+		mTextureBatch.draw(lCoreTexture, 256, 0, 32, 32, lCursorX, lCursorY, 32, 32, -0.01f, 1f, 1f, 1f, 1f);
 		mTextureBatch.end();
 
 	}
@@ -201,7 +204,7 @@ public class BaseGame extends LintfordCore {
 
 			@Override
 			public boolean windowResizeable() {
-				return false;
+				return true;
 			}
 
 		};

@@ -7,9 +7,10 @@ import com.ruse.spread.controllers.WorldController;
 
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
+import net.lintford.library.core.ResourceManager;
 import net.lintford.library.core.debug.Debug;
 import net.lintford.library.core.graphics.fonts.FontManager.FontUnit;
-import net.lintford.library.core.graphics.textures.TextureManager;
+import net.lintford.library.core.graphics.textures.Texture;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
 import net.lintford.library.renderers.BaseRenderer;
 import net.lintford.library.renderers.RendererManager;
@@ -36,6 +37,8 @@ public class DebugRenderer extends BaseRenderer {
 	private boolean mDrawTileCoords = false;
 	private boolean mDrawSpreadPopulation = false;
 
+	private Texture mUITexture;
+
 	@Override
 	public int ZDepth() {
 		return 20;
@@ -58,7 +61,15 @@ public class DebugRenderer extends BaseRenderer {
 	public void initialise(LintfordCore pCore) {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
-		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mEntityID);
+		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, entityGroupID());
+
+	}
+
+	@Override
+	public void loadGLContent(ResourceManager pResourceManager) {
+		super.loadGLContent(pResourceManager);
+
+		mUITexture = pResourceManager.textureManager().textureCore();
 
 	}
 
@@ -73,13 +84,12 @@ public class DebugRenderer extends BaseRenderer {
 			mDrawTileCoords = !mDrawTileCoords;
 
 		}
-		
+
 		if (pCore.input().keyDownTimed(GLFW.GLFW_KEY_F7)) {
 			mDrawSpreadPopulation = !mDrawSpreadPopulation;
 
 		}
-		
-		
+
 		if (pCore.input().keyDownTimed(GLFW.GLFW_KEY_F9)) {
 			mDrawRegionUIDs = !mDrawRegionUIDs;
 
@@ -131,7 +141,7 @@ public class DebugRenderer extends BaseRenderer {
 					final float xOff = -width * tileSize * 0.5f;
 					final float yOff = -height * tileSize * 0.5f;
 
-					lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 127, 0, 32, 32, xOff + x * tileSize, yOff + y * tileSize, tileSize, tileSize, -0.1f, 1f, 1f, 1f, dAmt);
+					lTextureBatch.draw(mUITexture, 127, 0, 32, 32, xOff + x * tileSize, yOff + y * tileSize, tileSize, tileSize, -0.1f, 1f, 1f, 1f, dAmt);
 
 				}
 
@@ -191,7 +201,8 @@ public class DebugRenderer extends BaseRenderer {
 	}
 
 	private void renderCenterPoint(LintfordCore pCore) {
-		Debug.debugManager().drawers().drawRect(pCore.gameCamera(), -2, -2, 4, 4, 1f, 0, 0);
+		Debug.debugManager().drawers().drawRectImmediate(pCore.gameCamera(), -2, -2, 4, 4, 1f, 0, 0);
+
 	}
 
 }

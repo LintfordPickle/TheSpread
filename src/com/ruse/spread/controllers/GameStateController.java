@@ -54,8 +54,8 @@ public class GameStateController extends BaseController {
 	// Constructor
 	// ---------------------------------------------
 
-	public GameStateController(ControllerManager pControllerManager, GameState pGameState, int pGroupID) {
-		super(pControllerManager, CONTROLLER_NAME, pGroupID);
+	public GameStateController(ControllerManager pControllerManager, GameState pGameState, int pEntityGroupID) {
+		super(pControllerManager, CONTROLLER_NAME, pEntityGroupID);
 
 		mGameState = pGameState;
 
@@ -65,8 +65,8 @@ public class GameStateController extends BaseController {
 	public void initialise(LintfordCore pCore) {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
-		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mGroupID);
-		mCameraBoundController = (CameraBoundController) lControllerManager.getControllerByNameRequired(CameraBoundController.CONTROLLER_NAME, mGroupID);
+		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, entityGroupID());
+		mCameraBoundController = (CameraBoundController) lControllerManager.getControllerByNameRequired(CameraBoundController.CONTROLLER_NAME, entityGroupID());
 
 	}
 

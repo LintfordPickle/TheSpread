@@ -1,5 +1,7 @@
 package com.ruse.spread.renderers;
 
+import org.lwjgl.glfw.GLFW;
+
 import com.ruse.spread.controllers.MouseController;
 import com.ruse.spread.controllers.NodeController;
 import com.ruse.spread.controllers.WorldController;
@@ -13,9 +15,10 @@ import com.ruse.spread.data.world.nodes.WorldNode;
 
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
+import net.lintford.library.core.ResourceManager;
 import net.lintford.library.core.geometry.Rectangle;
 import net.lintford.library.core.graphics.fonts.FontManager.FontUnit;
-import net.lintford.library.core.graphics.textures.TextureManager;
+import net.lintford.library.core.graphics.textures.Texture;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
 import net.lintford.library.renderers.BaseRenderer;
 import net.lintford.library.renderers.RendererManager;
@@ -63,6 +66,10 @@ public class HUDRenderer extends BaseRenderer {
 	private WorldNode mSelectedNode;
 	private WorldRegion mSelectedRegion;
 
+	private boolean mHUDEnabled = true;
+
+	private Texture mUITexture;
+
 	// ---------------------------------------------
 	// Properties
 	// ---------------------------------------------
@@ -102,9 +109,17 @@ public class HUDRenderer extends BaseRenderer {
 	public void initialise(LintfordCore pCore) {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
-		mMouseController = (MouseController) lControllerManager.getControllerByNameRequired(MouseController.CONTROLLER_NAME, mEntityID);
-		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mEntityID);
-		mNodeController = (NodeController) lControllerManager.getControllerByNameRequired(NodeController.CONTROLLER_NAME, mEntityID);
+		mMouseController = (MouseController) lControllerManager.getControllerByNameRequired(MouseController.CONTROLLER_NAME, entityGroupID());
+		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, entityGroupID());
+		mNodeController = (NodeController) lControllerManager.getControllerByNameRequired(NodeController.CONTROLLER_NAME, entityGroupID());
+
+	}
+
+	@Override
+	public void loadGLContent(ResourceManager pResourceManager) {
+		super.loadGLContent(pResourceManager);
+
+		mUITexture = pResourceManager.textureManager().textureCore();
 
 	}
 
@@ -112,6 +127,10 @@ public class HUDRenderer extends BaseRenderer {
 	public boolean handleInput(LintfordCore pCore) {
 
 		mMouseOverText = "";
+
+		if (pCore.input().keyDownTimed(GLFW.GLFW_KEY_F11)) {
+			mHUDEnabled = !mHUDEnabled;
+		}
 
 		// Cancel Build
 		if (pCore.input().isMouseTimedRightClickAvailable()) {
@@ -157,6 +176,9 @@ public class HUDRenderer extends BaseRenderer {
 	@Override
 	public void draw(LintfordCore pCore) {
 
+		if (!mHUDEnabled)
+			return;
+
 		final int PANEL_HEIGHT = 128;
 		final float lPanelPositionX = -320;
 		final float lPanelPositionY = 320 - PANEL_HEIGHT;
@@ -164,17 +186,17 @@ public class HUDRenderer extends BaseRenderer {
 		TextureBatch lTextureBatch = mRendererManager.uiTextureBatch();
 
 		lTextureBatch.begin(pCore.HUD());
-		lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 0, 128, 640, 128, lPanelPositionX, lPanelPositionY, 640, PANEL_HEIGHT, -0.02f, 1f, 1f, 1f, 1f);
+		lTextureBatch.draw(mUITexture, 0, 128, 640, 128, lPanelPositionX, lPanelPositionY, 640, PANEL_HEIGHT, -0.02f, 1f, 1f, 1f, 1f);
 
 		// Nodes
-		lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 288, 0, 32, 32, mNodeNormalButtonArea, -0.02f, 1f, 1f, 1f, 1f);
-		lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 288, 32, 32, 32, mNodeLongButtonArea, -0.02f, 1f, 1f, 1f, 1f);
-		lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 288, 64, 32, 32, mNodeStorageButtonArea, -0.02f, 1f, 1f, 1f, 1f);
+		lTextureBatch.draw(mUITexture, 288, 0, 32, 32, mNodeNormalButtonArea, -0.02f, 1f, 1f, 1f, 1f);
+		lTextureBatch.draw(mUITexture, 288, 32, 32, 32, mNodeLongButtonArea, -0.02f, 1f, 1f, 1f, 1f);
+		lTextureBatch.draw(mUITexture, 288, 64, 32, 32, mNodeStorageButtonArea, -0.02f, 1f, 1f, 1f, 1f);
 
 		// Military
-		lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 320, 0, 32, 32, mPillBoxButtonArea, -0.02f, 1f, 1f, 1f, 1f);
-		lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 320, 32, 32, 32, mTurretButtonArea, -0.02f, 1f, 1f, 1f, 1f);
-		lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 320, 64, 32, 32, mMortarButtonArea, -0.02f, 1f, 1f, 1f, 1f);
+		lTextureBatch.draw(mUITexture, 320, 0, 32, 32, mPillBoxButtonArea, -0.02f, 1f, 1f, 1f, 1f);
+		lTextureBatch.draw(mUITexture, 320, 32, 32, 32, mTurretButtonArea, -0.02f, 1f, 1f, 1f, 1f);
+		lTextureBatch.draw(mUITexture, 320, 64, 32, 32, mMortarButtonArea, -0.02f, 1f, 1f, 1f, 1f);
 
 		lTextureBatch.end();
 
@@ -188,7 +210,7 @@ public class HUDRenderer extends BaseRenderer {
 
 		if (!mMouseOverText.isEmpty()) {
 			lTextureBatch.begin(pCore.HUD());
-			lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 0, 0, 32, 32, -315, lPanelPositionY - 30, 270, 25, -0.1f, 0.1f, 0.12f, 0f, 0.55f);
+			lTextureBatch.draw(mUITexture, 0, 0, 32, 32, -315, lPanelPositionY - 30, 270, 25, -0.1f, 0.1f, 0.12f, 0f, 0.55f);
 			lTextureBatch.end();
 
 			lFont.draw(mMouseOverText, lPanelPositionX + 15f, lPanelPositionY - 25, -0.02f, 0.85f, 0.91f, 1f, 1f, 1f, -1);
@@ -218,9 +240,9 @@ public class HUDRenderer extends BaseRenderer {
 			mActivateNodeButtonArea.set(-320 + 235 - 32, lMinusY + 60, 32, 32);
 
 			lTextureBatch.begin(pCore.HUD());
-			lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 0, 0, 32, 32, -315, lMinusY, 270, SUB_PANEL_HEIGHT, -0.1f, 0.1f, 0.12f, 0f, 0.55f);
-			lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 288, 96, 32, 32, mDeleteNodeButtonArea, -0.02f, 1f, 1f, 1f, 1f);
-			lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 320, 96, 32, 32, mActivateNodeButtonArea, -0.02f, 1f, 1f, 1f, 1f);
+			lTextureBatch.draw(mUITexture, 0, 0, 32, 32, -315, lMinusY, 270, SUB_PANEL_HEIGHT, -0.1f, 0.1f, 0.12f, 0f, 0.55f);
+			lTextureBatch.draw(mUITexture, 288, 96, 32, 32, mDeleteNodeButtonArea, -0.02f, 1f, 1f, 1f, 1f);
+			lTextureBatch.draw(mUITexture, 320, 96, 32, 32, mActivateNodeButtonArea, -0.02f, 1f, 1f, 1f, 1f);
 			lTextureBatch.end();
 
 			lTextureBatch.begin(pCore.HUD());
@@ -230,26 +252,26 @@ public class HUDRenderer extends BaseRenderer {
 				lFont.begin(pCore.HUD());
 				lFont.draw(String.format("Node: %s %s", mSelectedNode.name, lRegionName), -310, lMinusY, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 
-				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 160, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
+				lTextureBatch.draw(mUITexture, 160, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("People: " + mSelectedNode.populationStore + "/" + mSelectedNode.storageCapacityPopulation, -280, lMinusY + 25, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 
-				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 192, 0, 16, 16, -300, lMinusY + 47, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
+				lTextureBatch.draw(mUITexture, 192, 0, 16, 16, -300, lMinusY + 47, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("Food: " + mSelectedNode.foodStore + "/" + mSelectedNode.storageCapacityFood, -280, lMinusY + 45, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 
-				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 224, 0, 16, 16, -300, lMinusY + 67, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
+				lTextureBatch.draw(mUITexture, 224, 0, 16, 16, -300, lMinusY + 67, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("Metal: " + mSelectedNode.metalStore + "/" + mSelectedNode.storageCapacityMetal, -280, lMinusY + 65, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 				lFont.end();
 			} else {
 				lFont.begin(pCore.HUD());
 				lFont.draw(mSelectedNode.name + "(under construction)", -310, lMinusY, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 
-				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 160, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
+				lTextureBatch.draw(mUITexture, 160, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("needs " + mSelectedNode.neededPop + " people", -280, lMinusY + 25, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 
-				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 192, 0, 16, 16, -300, lMinusY + 47, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
+				lTextureBatch.draw(mUITexture, 192, 0, 16, 16, -300, lMinusY + 47, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("needs " + mSelectedNode.neededFood + " food", -280, lMinusY + 45, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 
-				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 224, 0, 16, 16, -300, lMinusY + 67, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
+				lTextureBatch.draw(mUITexture, 224, 0, 16, 16, -300, lMinusY + 67, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("needs " + mSelectedNode.neededMetals + " metals", -280, lMinusY + 65, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 
 				lFont.end();
@@ -264,7 +286,7 @@ public class HUDRenderer extends BaseRenderer {
 			// Render region information
 
 			lTextureBatch.begin(pCore.HUD());
-			lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 0, 0, 32, 32, -315, lMinusY, 270, SUB_PANEL_HEIGHT, -0.2f, 0.1f, 0.12f, 0f, 0.55f);
+			lTextureBatch.draw(mUITexture, 0, 0, 32, 32, -315, lMinusY, 270, SUB_PANEL_HEIGHT, -0.2f, 0.1f, 0.12f, 0f, 0.55f);
 			lTextureBatch.end();
 
 			lFont.begin(pCore.HUD());
@@ -274,22 +296,22 @@ public class HUDRenderer extends BaseRenderer {
 			switch (mSelectedRegion.type()) {
 			case World.REGION_TYPE_CITY:
 				CityRegion lCity = (CityRegion) mSelectedRegion;
-				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 160, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
+				lTextureBatch.draw(mUITexture, 160, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("People: " + lCity.popStorage + "/" + lCity.popStorageCapacity, -280, lMinusY + 25, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 
-				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 192, 0, 16, 16, -300, lMinusY + 47, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
+				lTextureBatch.draw(mUITexture, 192, 0, 16, 16, -300, lMinusY + 47, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("Food: " + lCity.foodStorage + "/" + lCity.foodStorageCapacity, -280, lMinusY + 45, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 				break;
 
 			case World.REGION_TYPE_FARM:
 				FarmRegion lFarm = (FarmRegion) mSelectedRegion;
-				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 192, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
+				lTextureBatch.draw(mUITexture, 192, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("Food: " + lFarm.storage + "/" + lFarm.storageCapacity, -280, lMinusY + 25, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 				break;
 
 			case World.REGION_TYPE_MINE:
 				MineRegion lMine = (MineRegion) mSelectedRegion;
-				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 224, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
+				lTextureBatch.draw(mUITexture, 224, 0, 16, 16, -300, lMinusY + 27, 16, 16, -0.02f, 1f, 1f, 1f, 1f);
 				lFont.draw("Metal: " + lMine.storage + "/" + lMine.storageCapacity, -280, lMinusY + 25, -0.02f, 0.85f, 0.91f, 0.88f, 1f, lTextScale, -1);
 				break;
 

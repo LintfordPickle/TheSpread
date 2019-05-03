@@ -12,11 +12,10 @@ import com.ruse.spread.data.world.nodes.WorldNode;
 
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
+import net.lintford.library.core.ResourceManager;
 import net.lintford.library.core.geometry.Rectangle;
-import net.lintford.library.core.graphics.ResourceManager;
 import net.lintford.library.core.graphics.fonts.FontManager.FontUnit;
 import net.lintford.library.core.graphics.textures.Texture;
-import net.lintford.library.core.graphics.textures.TextureManager;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
 import net.lintford.library.renderers.BaseRenderer;
 import net.lintford.library.renderers.RendererManager;
@@ -37,6 +36,7 @@ public class NodeRenderer extends BaseRenderer {
 	private MouseController mMouseController;
 	private NodeController mNodeController;
 
+	private Texture mUITexture;
 	private Texture mGameTexture;
 	private boolean mDrawPop;
 	private boolean mDrawHash;
@@ -70,9 +70,9 @@ public class NodeRenderer extends BaseRenderer {
 	public void initialise(LintfordCore pCore) {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
-		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mEntityID);
-		mMouseController = (MouseController) lControllerManager.getControllerByNameRequired(MouseController.CONTROLLER_NAME, mEntityID);
-		mNodeController = (NodeController) lControllerManager.getControllerByNameRequired(NodeController.CONTROLLER_NAME, mEntityID);
+		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, entityGroupID());
+		mMouseController = (MouseController) lControllerManager.getControllerByNameRequired(MouseController.CONTROLLER_NAME, entityGroupID());
+		mNodeController = (NodeController) lControllerManager.getControllerByNameRequired(NodeController.CONTROLLER_NAME, entityGroupID());
 
 	}
 
@@ -80,7 +80,8 @@ public class NodeRenderer extends BaseRenderer {
 	public void loadGLContent(ResourceManager pResourceManager) {
 		super.loadGLContent(pResourceManager);
 
-		mGameTexture = TextureManager.textureManager().loadTexture("GameTexture", "res/textures/game.png");
+		mUITexture = pResourceManager.textureManager().textureCore();
+		mGameTexture = pResourceManager.textureManager().loadTexture("GameTexture", "res/textures/game.png", entityGroupID());
 
 	}
 
@@ -178,7 +179,7 @@ public class NodeRenderer extends BaseRenderer {
 			}
 
 			Rectangle lRect = lWorldPackage.mBounds;
-			lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, xSrc, ySrc, 16, 16, lRect, -0.25f, 1f, 1f, 1f, 1f);
+			lTextureBatch.draw(mUITexture, xSrc, ySrc, 16, 16, lRect, -0.25f, 1f, 1f, 1f, 1f);
 
 		}
 
@@ -245,8 +246,8 @@ public class NodeRenderer extends BaseRenderer {
 			float lPopB = (lNode.populationStore > lNode.maintainMinimumPop) ? 1f : 0f;
 
 			if (lNode.nodeType() == WorldNode.NODE_TYPE_TURRET) {
-				lTextureBatch.draw(mGameTexture, 160, 160, 32, 16, lNode.mBounds.centerX() - 6, lNode.mBounds.centerY() - 7, 32, 16, -0.2f, lNode.angle, 4, 7, 0.5f, 1f * lNotConstructedModifier,
-						1f * lNotConstructedModifier, 1f * lNotConstructedModifier, lNotConstructedModifier);
+				lTextureBatch.draw(mGameTexture, 160, 160, 32, 16, lNode.mBounds.centerX() - 6, lNode.mBounds.centerY() - 7, 32, 16, -0.2f, lNode.angle, 4, 7, 0.5f, 1f * lNotConstructedModifier, 1f * lNotConstructedModifier,
+						1f * lNotConstructedModifier, lNotConstructedModifier);
 			}
 
 			if (mDrawPop && lNode.nodeType() != WorldNode.NODE_TYPE_SPREADER) // pop count

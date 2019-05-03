@@ -10,10 +10,10 @@ import com.ruse.spread.data.world.WorldContourLine;
 
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
-import net.lintford.library.core.graphics.ResourceManager;
+import net.lintford.library.core.ResourceManager;
+import net.lintford.library.core.debug.GLDebug;
 import net.lintford.library.core.graphics.linebatch.LineBatch;
 import net.lintford.library.core.graphics.textures.Texture;
-import net.lintford.library.core.graphics.textures.TextureManager;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
 import net.lintford.library.core.maths.Vector3f;
 import net.lintford.library.renderers.BaseRenderer;
@@ -37,7 +37,8 @@ public class WorldRenderer extends BaseRenderer {
 
 	private WorldController mWorldController;
 	private Texture mGroundTexture;
-	TextureBatch mGroundTextureBatch;
+	private TextureBatch mGroundTextureBatch;
+	private Texture mUITexture;
 
 	@Override
 	public int ZDepth() {
@@ -63,7 +64,7 @@ public class WorldRenderer extends BaseRenderer {
 	public void initialise(LintfordCore pCore) {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
-		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mEntityID);
+		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, entityGroupID());
 
 	}
 
@@ -71,7 +72,9 @@ public class WorldRenderer extends BaseRenderer {
 	public void loadGLContent(ResourceManager pResourceManager) {
 		super.loadGLContent(pResourceManager);
 
-		mGroundTexture = TextureManager.textureManager().loadTexture("GameTexture", "res/textures/game.png");
+		mUITexture = pResourceManager.textureManager().textureCore();
+
+		mGroundTexture = pResourceManager.textureManager().loadTexture("GameTexture", "res/textures/game.png", entityGroupID());
 		mGroundTextureBatch.loadGLContent(pResourceManager);
 
 	}
@@ -118,7 +121,7 @@ public class WorldRenderer extends BaseRenderer {
 				final float xOff = -width * tileSize * 0.5f;
 				final float yOff = -height * tileSize * 0.5f;
 
-				lTextureBatch.draw(TextureManager.TEXTURE_CORE_UI, 0, 0, 32, 32, xOff + x * tileSize, yOff + y * tileSize, tileSize, tileSize, -0.3f, tileColor.x * dAmt, tileColor.y * dAmt, tileColor.z * dAmt, 1f);
+				lTextureBatch.draw(mUITexture, 0, 0, 32, 32, xOff + x * tileSize, yOff + y * tileSize, tileSize, tileSize, -0.3f, tileColor.x * dAmt, tileColor.y * dAmt, tileColor.z * dAmt, 1f);
 				mGroundTextureBatch.draw(mGroundTexture, 0, 0, 32, 32, xOff + x * tileSize, yOff + y * tileSize, tileSize, tileSize, -0.3f, tileColor.x * dAmt, tileColor.y * dAmt, tileColor.z * dAmt, 0.8f);
 
 			}
@@ -132,19 +135,30 @@ public class WorldRenderer extends BaseRenderer {
 		List<WorldContourLine> lLines = mWorldController.gameWorld().world().mWorldContours;
 
 		GL11.glLineWidth(1);
+		
+		GLDebug.checkGLErrorsException(getClass().getSimpleName());
 
 		LineBatch lLineBatch = mRendererManager.uiLineBatch();
+		
+		GLDebug.checkGLErrorsException(getClass().getSimpleName());
 
 		final int lLineCount = lLines.size();
 		lLineBatch.begin(pCore.gameCamera());
+		
+		GLDebug.checkGLErrorsException(getClass().getSimpleName());
+		
 		for (int i = 0; i < lLineCount; i++) {
 			WorldContourLine lLine = lLines.get(i);
 			float pAmt = 0f;
 			lLineBatch.a = 1f / lLine.height * 1f;
 			lLineBatch.draw(lLine.start.x, lLine.start.y, lLine.end.x, lLine.end.y, -0.3f, pAmt, pAmt, pAmt);
 
+			GLDebug.checkGLErrorsException(getClass().getSimpleName());
+			
 		}
 		lLineBatch.end();
+		
+		GLDebug.checkGLErrorsException(getClass().getSimpleName());
 	}
 
 }

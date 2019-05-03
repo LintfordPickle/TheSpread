@@ -27,10 +27,9 @@ import com.ruse.spread.renderers.WorldRenderer;
 import net.lintford.library.controllers.camera.CameraZoomController;
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
+import net.lintford.library.core.ResourceManager;
 import net.lintford.library.core.camera.Camera;
-import net.lintford.library.core.graphics.ResourceManager;
 import net.lintford.library.core.graphics.textures.Texture;
-import net.lintford.library.core.graphics.textures.TextureManager;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
 import net.lintford.library.screenmanager.ScreenManager;
 import net.lintford.library.screenmanager.screens.BaseGameScreen;
@@ -89,26 +88,26 @@ public class GameScreen extends BaseGameScreen {
 
 		ControllerManager lControllerManager = pScreenManager.core().controllerManager();
 
-		mWorldController = new WorldController(lControllerManager, mWorld, entityGroupID);
-		mMouseController = new MouseController(lControllerManager, entityGroupID);
-		mPackageController = new PackageController(lControllerManager, entityGroupID);
-		mRegionController = new RegionController(lControllerManager, entityGroupID);
-		mRoadController = new RoadController(lControllerManager, entityGroupID);
-		mSpreadController = new SpreadController(lControllerManager, entityGroupID);
-		mNodeController = new NodeController(lControllerManager, entityGroupID);
-		mProjectileController = new ParticleController(lControllerManager, mWorld.projectileManager(), entityGroupID);
+		mWorldController = new WorldController(lControllerManager, mWorld, entityGroupID());
+		mMouseController = new MouseController(lControllerManager, entityGroupID());
+		mPackageController = new PackageController(lControllerManager, entityGroupID());
+		mRegionController = new RegionController(lControllerManager, entityGroupID());
+		mRoadController = new RoadController(lControllerManager, entityGroupID());
+		mSpreadController = new SpreadController(lControllerManager, entityGroupID());
+		mNodeController = new NodeController(lControllerManager, entityGroupID());
+		mProjectileController = new ParticleController(lControllerManager, mWorld.projectileManager(), entityGroupID());
 
-		mGameStateController = new GameStateController(lControllerManager, mWorld.gameState(), entityGroupID);
+		mGameStateController = new GameStateController(lControllerManager, mWorld.gameState(), entityGroupID());
 
-		mWorldRenderer = new WorldRenderer(mRendererManager, entityGroupID);
-		mObjectRenderer = new NodeRenderer(mRendererManager, entityGroupID);
-		mRoadRenderer = new RoadRenderer(mRendererManager, entityGroupID);
-		mRegionRenderer = new RegionRenderer(mRendererManager, entityGroupID);
-		mProjectileRenderer = new ProjectileRenderer(mRendererManager, mWorld, entityGroupID);
-		mHUDRenderer = new HUDRenderer(mRendererManager, entityGroupID);
-		mMouseRenderer = new MouseRenderer(mRendererManager, entityGroupID);
-		mDebugRenderer = new DebugRenderer(mRendererManager, entityGroupID);
-		mSpreadRenderer = new SpreadRenderer(mRendererManager, entityGroupID);
+		mWorldRenderer = new WorldRenderer(mRendererManager, entityGroupID());
+		mObjectRenderer = new NodeRenderer(mRendererManager, entityGroupID());
+		mRoadRenderer = new RoadRenderer(mRendererManager, entityGroupID());
+		mRegionRenderer = new RegionRenderer(mRendererManager, entityGroupID());
+		mProjectileRenderer = new ProjectileRenderer(mRendererManager, mWorld, entityGroupID());
+		mHUDRenderer = new HUDRenderer(mRendererManager, entityGroupID());
+		mMouseRenderer = new MouseRenderer(mRendererManager, entityGroupID());
+		mDebugRenderer = new DebugRenderer(mRendererManager, entityGroupID());
+		mSpreadRenderer = new SpreadRenderer(mRendererManager, entityGroupID());
 
 	}
 
@@ -122,11 +121,11 @@ public class GameScreen extends BaseGameScreen {
 
 		ControllerManager lControllerManager = mScreenManager.core().controllerManager();
 
-		mCameraZoomController = new CameraZoomController(lControllerManager, (Camera) mScreenManager.core().gameCamera(), entityGroupID);
+		mCameraZoomController = new CameraZoomController(lControllerManager, (Camera) mScreenManager.core().gameCamera(), entityGroupID());
 		mCameraZoomController.setZoomConstraints(0.7f, 1.7f);
 		mCameraZoomController.initialise(mScreenManager.core());
 
-		mCameraBoundController = new CameraBoundController(lControllerManager, (Camera) mScreenManager.core().gameCamera(), null, entityGroupID);
+		mCameraBoundController = new CameraBoundController(lControllerManager, (Camera) mScreenManager.core().gameCamera(), null, entityGroupID());
 		mCameraBoundController.initialise(mScreenManager.core());
 
 		mWorldController.initialise(mScreenManager.core());
@@ -159,7 +158,7 @@ public class GameScreen extends BaseGameScreen {
 	public void loadGLContent(ResourceManager pResourceManager) {
 		super.loadGLContent(pResourceManager);
 
-		mBackgroundTexture = TextureManager.textureManager().loadTexture("GameBackground", "res/textures/screens/background.png", GL11.GL_LINEAR);
+		mBackgroundTexture = pResourceManager.textureManager().loadTexture("GameBackground", "res/textures/screens/background.png", GL11.GL_LINEAR, entityGroupID());
 	}
 
 	@Override
@@ -192,11 +191,11 @@ public class GameScreen extends BaseGameScreen {
 		if (mGameStateController.isGameEnded()) {
 			if (mGameStateController.isGameWon()) {
 				// Game won
-				mScreenManager.addScreen(new GameWonScreen(mScreenManager, entityGroupID));
+				mScreenManager.addScreen(new GameWonScreen(mScreenManager, entityGroupID()));
 
 			} else {
 				// Game lost
-				mScreenManager.addScreen(new GameLostScreen(mScreenManager, entityGroupID));
+				mScreenManager.addScreen(new GameLostScreen(mScreenManager, entityGroupID()));
 
 			}
 
@@ -228,15 +227,5 @@ public class GameScreen extends BaseGameScreen {
 	// ---------------------------------------------
 	// Methods
 	// ---------------------------------------------
-
-	@Override
-	public void updateStructureDimensions(LintfordCore pCore) {
-
-	}
-
-	@Override
-	public void updateStructurePositions(LintfordCore pCore) {
-
-	}
 
 }

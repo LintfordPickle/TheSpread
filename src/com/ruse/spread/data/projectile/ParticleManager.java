@@ -1,9 +1,9 @@
 package com.ruse.spread.data.projectile;
 
 import net.lintford.library.core.LintfordCore;
+import net.lintford.library.core.ResourceManager;
 import net.lintford.library.core.audio.AudioData;
 import net.lintford.library.core.audio.AudioManager;
-import net.lintford.library.core.graphics.ResourceManager;
 import net.lintford.library.core.graphics.particles.initialisers.ParticleTurnToFaceInitialiser;
 import net.lintford.library.core.graphics.particles.modifiers.ParticlePhysicsModifier;
 import net.lintford.library.renderers.particles.ParticleRenderer;
@@ -95,7 +95,8 @@ public class ParticleManager {
 
 		mBulletParticles.initialise("worldParticles", "res/textures/worldParticles.png");
 
-		mBulletRenderer = new ParticleRenderer();
+		// FIXME: this needs a specific/dedicated entityGroupID
+		mBulletRenderer = new ParticleRenderer(LintfordCore.CORE_ENTITY_GROUP_ID);
 		mBulletRenderer.assignParticleSystem(mBulletParticles);
 
 	}

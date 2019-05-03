@@ -29,8 +29,8 @@ public class RoadController extends BaseController {
 	// Constructor
 	// ---------------------------------------------
 
-	public RoadController(ControllerManager pControllerManager, int pGroupID) {
-		super(pControllerManager, CONTROLLER_NAME, pGroupID);
+	public RoadController(ControllerManager pControllerManager, int pEntityGroupID) {
+		super(pControllerManager, CONTROLLER_NAME, pEntityGroupID);
 
 	}
 

@@ -40,8 +40,8 @@ public class WorldController extends BaseController {
 	// Constructor
 	// ---------------------------------------------
 
-	public WorldController(ControllerManager pControllerManager, GameWorld pGameWorld, int pGroupID) {
-		super(pControllerManager, CONTROLLER_NAME, pGroupID);
+	public WorldController(ControllerManager pControllerManager, GameWorld pGameWorld, int pEntityGroupID) {
+		super(pControllerManager, CONTROLLER_NAME, pEntityGroupID);
 
 		mGameWorld = pGameWorld;
 

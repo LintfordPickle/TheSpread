@@ -36,8 +36,8 @@ public class MouseController extends BaseController {
 	// Constructor
 	// ---------------------------------------------
 
-	public MouseController(ControllerManager pControllerManager, int pGroupID) {
-		super(pControllerManager, CONTROLLER_NAME, pGroupID);
+	public MouseController(ControllerManager pControllerManager, int pEntityGroupID) {
+		super(pControllerManager, CONTROLLER_NAME, pEntityGroupID);
 
 	}
 

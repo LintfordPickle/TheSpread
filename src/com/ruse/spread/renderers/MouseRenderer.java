@@ -5,9 +5,8 @@ import com.ruse.spread.data.world.nodes.WorldNode;
 
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
-import net.lintford.library.core.graphics.ResourceManager;
+import net.lintford.library.core.ResourceManager;
 import net.lintford.library.core.graphics.textures.Texture;
-import net.lintford.library.core.graphics.textures.TextureManager;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
 import net.lintford.library.renderers.BaseRenderer;
 import net.lintford.library.renderers.RendererManager;
@@ -25,7 +24,7 @@ public class MouseRenderer extends BaseRenderer {
 	// ---------------------------------------------
 
 	private MouseController mMouseController;
-	
+
 	private Texture mGameTexture;
 
 	// ---------------------------------------------
@@ -54,18 +53,18 @@ public class MouseRenderer extends BaseRenderer {
 	public void initialise(LintfordCore pCore) {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
-		mMouseController = (MouseController) lControllerManager.getControllerByNameRequired(MouseController.CONTROLLER_NAME, mEntityID);
+		mMouseController = (MouseController) lControllerManager.getControllerByNameRequired(MouseController.CONTROLLER_NAME, entityGroupID());
 
 	}
 
 	@Override
 	public void loadGLContent(ResourceManager pResourceManager) {
 		super.loadGLContent(pResourceManager);
-		
-		mGameTexture = TextureManager.textureManager().loadTexture("GameTexture", "res/textures/game.png");
-		
+
+		mGameTexture = pResourceManager.textureManager().loadTexture("GameTexture", "res/textures/game.png", entityGroupID());
+
 	}
-	
+
 	@Override
 	public void draw(LintfordCore pCore) {
 		float lCursorX = pCore.HUD().getMouseWorldSpaceX();

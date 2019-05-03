@@ -1,9 +1,8 @@
 package com.ruse.spread.screens;
 
 import net.lintford.library.core.LintfordCore;
-import net.lintford.library.core.graphics.ResourceManager;
+import net.lintford.library.core.ResourceManager;
 import net.lintford.library.core.graphics.textures.Texture;
-import net.lintford.library.core.graphics.textures.TextureManager;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
 import net.lintford.library.screenmanager.Screen;
 import net.lintford.library.screenmanager.ScreenManager;
@@ -37,7 +36,7 @@ public class MenuBackground extends Screen {
 	public void loadGLContent(ResourceManager pResourceManager) {
 		super.loadGLContent(pResourceManager);
 
-		mBackgroundTexture = TextureManager.textureManager().loadTexture("BackgroundTexture", "res/textures/screens/menu.png");
+		mBackgroundTexture = pResourceManager.textureManager().loadTexture("BackgroundTexture", "res/textures/screens/menu.png", entityGroupID());
 
 	}
 
@@ -58,18 +57,6 @@ public class MenuBackground extends Screen {
 	// --------------------------------------
 	// Methods
 	// --------------------------------------
-
-	@Override
-	public void updateStructurePositions(LintfordCore pCore) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void updateStructureDimensions(LintfordCore pCore) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void exitScreen() {

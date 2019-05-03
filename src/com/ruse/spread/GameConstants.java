@@ -3,8 +3,8 @@ package com.ruse.spread;
 public class GameConstants {
 
 	// World
-	public static final int WIDTH = 32;
-	public static final int HEIGHT = 32;
+	public static final int WIDTH = 64;
+	public static final int HEIGHT = 64;
 
 	public static final int NUM_CITIES =12;
 

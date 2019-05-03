@@ -7,9 +7,8 @@ import com.ruse.spread.data.world.WorldRegion;
 
 import net.lintford.library.controllers.core.ControllerManager;
 import net.lintford.library.core.LintfordCore;
-import net.lintford.library.core.graphics.ResourceManager;
+import net.lintford.library.core.ResourceManager;
 import net.lintford.library.core.graphics.textures.Texture;
-import net.lintford.library.core.graphics.textures.TextureManager;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
 import net.lintford.library.core.maths.RandomNumbers;
 import net.lintford.library.renderers.BaseRenderer;
@@ -52,7 +51,7 @@ public class RegionRenderer extends BaseRenderer {
 	public void initialise(LintfordCore pCore) {
 		ControllerManager lControllerManager = pCore.controllerManager();
 
-		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, mEntityID);
+		mWorldController = (WorldController) lControllerManager.getControllerByNameRequired(WorldController.CONTROLLER_NAME, entityGroupID());
 
 	}
 
@@ -60,7 +59,7 @@ public class RegionRenderer extends BaseRenderer {
 	public void loadGLContent(ResourceManager pResourceManager) {
 		super.loadGLContent(pResourceManager);
 
-		mGroundTexture = TextureManager.textureManager().loadTexture("GameTexture", "res/textures/game.png");
+		mGroundTexture = pResourceManager.textureManager().loadTexture("GameTexture", "res/textures/game.png", entityGroupID());
 
 	}
 

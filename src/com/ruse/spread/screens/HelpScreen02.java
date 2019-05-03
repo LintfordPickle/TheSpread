@@ -1,9 +1,8 @@
 package com.ruse.spread.screens;
 
 import net.lintford.library.core.LintfordCore;
-import net.lintford.library.core.graphics.ResourceManager;
+import net.lintford.library.core.ResourceManager;
 import net.lintford.library.core.graphics.textures.Texture;
-import net.lintford.library.core.graphics.textures.TextureManager;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
 import net.lintford.library.screenmanager.MenuEntry;
 import net.lintford.library.screenmanager.MenuScreen;
@@ -58,7 +57,7 @@ public class HelpScreen02 extends MenuScreen {
 	public void loadGLContent(ResourceManager pResourceManager) {
 		super.loadGLContent(pResourceManager);
 
-		mBackgroundTexture = TextureManager.textureManager().loadTexture("HelpScreen2", "res/textures/screens/help02.png");
+		mBackgroundTexture = pResourceManager.textureManager().loadTexture("HelpScreen2", "res/textures/screens/help02.png", entityGroupID());
 	}
 
 	@Override

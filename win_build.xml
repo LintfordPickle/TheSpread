@@ -15,10 +15,14 @@
 
 ====================================================================== -->
 
+<!-- Spread Build  -->
 <project name="Spread" basedir="." default="main">
 
 	<property name="build-drive">f:</property>
 	<property name="project.name">Spread</property>
+	
+	<!-- Use Core.jar as the application name if using JavaLauncher (just makes it easier) -->
+	<property name="application.name">core</property>
 
 	<property name="client-main-class">com.ruse.spread.BaseGame</property>
 
@@ -31,18 +35,22 @@
 	<property name="base.output.dir" value="${build-drive}/dist/java/${project.name}" />
 
 	<property name="build.dir" value="${base.output.dir}/build" />
-	<property name="dist.dir" value="${base.output.dir}/bin" />
+	<property name="dist.dir" value="${base.output.dir}/dist" />
 
 	<property name="dist.jar" value="${dist.dir}/" />
-	<property name="dist.lib" value="${dist.dir}/lib/" />
+	<property name="dist.lib" value="${dist.dir}/libs/" />
 	<property name="dist.doc" value="${dist.dir}/docs/" />
 	<property name="dist.res" value="${dist.dir}/res/" />
+	<property name="dist.jre" value="${dist.dir}/jre/"/>
 
 	<!-- clean build -->
 	<target name="clean">
 		<delete dir="${build.dir}" />
-		<delete dir="${dist.dir}" />
-		<delete dir="${base.output.dir}" />
+		<!-- <delete dir="${base.output.dir}" /> -->
+		<delete dir="${dist.dir}/res" />
+		<!-- <delete dir="${dist.lib}" /> -->
+		<!-- <delete dir="${dist.doc}" /> -->
+		<!-- <delete dir="${dist.jre}" /> -->
 	</target>
 
 	<!-- Create the output destination folders -->
@@ -64,15 +72,15 @@
 			</fileset>
 		</copy>
 
-		<!-- Copy the LDLibrary and its dependencies JARs into the game distribution directory. -->
+		<!-- Copy the LDLibrary and its dependencies JARs into the game distribution directory. --> 
 		<copy todir="${dist.dir}/">
 			<fileset dir="f:/dist/java/LDLibrary/bin">
 				<include name="**/*.jar" />
-				<exclude name="**/*javadoc*" />
-				<exclude name="**/*sources*" />
-				<exclude name="**/*linux*" />
-				<exclude name="**/*macos*" />
-				<exclude name="LDLibrary.jar" />
+				<exclude name="**/*javadoc*"/>
+				<exclude name="**/*sources*"/>
+				<exclude name="**/*linux*"/>
+				<exclude name="**/*macos*"/>
+				<exclude name="LDLibrary.jar"/>
 			</fileset>
 		</copy>
 
@@ -82,13 +90,14 @@
 				<include name="**/*.*" />
 			</fileset>
 		</copy>
+		
 		<!-- Copy any other JAR dependency files declared by the game. -->
 		<copy todir="${dist.lib}">
 			<fileset dir="${basedir}/${input.lib.dir}">
-				<exclude name="**/*javadoc*" />
-				<exclude name="**/*src*" />
-				<exclude name="**/*linux*" />
-				<exclude name="**/*macos*" />
+				<exclude name="**/*javadoc*"/>
+				<exclude name="**/*src*"/>
+				<exclude name="**/*linux*"/>
+				<exclude name="**/*macos*"/>
 				<include name="**/*.*" />
 			</fileset>
 		</copy>
@@ -106,7 +115,7 @@
 		<mapper>
 			<chainedmapper>
 				<flattenmapper />
-				<globmapper from="*.jar" to="lib/*.jar" />
+				<globmapper from="*.jar" to="${input.lib.dir}/*.jar" />
 			</chainedmapper>
 		</mapper>
 	</pathconvert>
@@ -119,16 +128,54 @@
 	<!-- create jar -->
 	<target name="createjar" depends="compile">
 		<echo message="createjar" />
-		<jar destfile="${dist.jar}/${project.name}.jar" basedir="${build.dir}/classes">
-			<fileset dir="${build.dir}/res" />
-			<!-- include the res folder from within the build dir (which contains res from the LDLibrary to embed in JAR) -->
+		<jar destfile="${dist.jar}/${application.name}.jar" basedir="${build.dir}/classes">
+			<fileset dir="${build.dir}/res" /> <!-- include the res folder from within the build dir (which contains res from the LDLibrary to embed in JAR) -->
 			<manifest>
 				<attribute name="Main-Class" value="${client-main-class}" />
 				<attribute name="Class-Path" value="${manifest.classpath}" />
 			</manifest>
 		</jar>
 	</target>
-
-	<target name="main" depends="clean, init, copy.dep, compile, createjar" />
+	
+	<!-- 
+	Dependencies list is based on the output of:
+	jdeps -multi-release base -class-path "lib/*" -recursive -s Excavation.jar
+	
+	which yields:
+	
+		*.jar -> lib\JBox2d.jar
+		*.jar -> lib\gson-2.8.6.jar
+		*.jar -> java.base
+		*.jar -> java.desktop
+		*.jar -> java.management
+		*.jar -> java.xml
+		*.jar -> jdk.management
+		*.jar -> jdk.unsupported (for sun.misc.Unsafe)
+		*.jar -> user libraries
+	
+	 -->
+	
+	<!-- bundle the JRE in the output folder -->	
+	<target name="bundle.jre" depends="check.jre" unless="jre.dir.exists">
+		<echo message="Bundling JRE" />
+		<exec executable="cmd">
+			<arg value="/c" />
+			<arg value='jlink --module-path "${dist.jre}\jmods" --add-modules java.base,java.sql,java.desktop,java.management,java.xml,jdk.unsupported,jdk.management --output ${dist.jre} --strip-debug --compress 2 --no-header-files --no-man-pages' />
+		</exec>
+	</target>
+	
+	<target name="notify.jre" depends="check.jre" if="jre.dir.exists">
+		<echo message="${dist.jre} exists. Not copying JRE" />
+	</target>
+	
+	<target name="check.jre">
+		<condition property="jre.dir.exists">
+	 		<available file="${dist.jre}" type="dir"/>
+		</condition>
+	</target>
+	
+	<!-- copy the custom launcher -->
+	
+	<target name="main" depends="clean, init, copy.dep, compile, createjar, notify.jre, bundle.jre" />
 
 </project>

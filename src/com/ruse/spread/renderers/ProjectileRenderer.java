@@ -4,11 +4,10 @@ import com.ruse.spread.data.GameWorld;
 import com.ruse.spread.data.projectile.ProjectileManager;
 
 import net.lintford.library.core.LintfordCore;
-import net.lintford.library.core.graphics.ResourceManager;
+import net.lintford.library.core.ResourceManager;
 import net.lintford.library.core.graphics.particles.Particle;
 import net.lintford.library.core.graphics.particles.ParticleSystem;
 import net.lintford.library.core.graphics.textures.Texture;
-import net.lintford.library.core.graphics.textures.TextureManager;
 import net.lintford.library.core.graphics.textures.texturebatch.TextureBatch;
 import net.lintford.library.renderers.BaseRenderer;
 import net.lintford.library.renderers.RendererManager;
@@ -63,7 +62,7 @@ public class ProjectileRenderer extends BaseRenderer {
 	public void loadGLContent(ResourceManager pResourceManager) {
 		super.loadGLContent(pResourceManager);
 
-		mParticlesTexture = TextureManager.textureManager().loadTexture("GameParticlesTexture", "res/textures/particles.png");
+		mParticlesTexture = pResourceManager.textureManager().loadTexture("GameParticlesTexture", "res/textures/particles.png", entityGroupID());
 
 	}
 
