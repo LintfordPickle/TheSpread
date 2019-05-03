@@ -3,21 +3,16 @@
 
      project     :	The Spread
      description :	Game made in 48 hours for Ludum Dare #43
-     
-			     	root / 
-					    build /         // all items of subfolders within this directory are included *within* the jar
-					        classes / 
-					        res /
-					    dist /
-					        docs / 
-					        res /
-					        libs /
 
 ====================================================================== -->
 
 <!-- Spread Build  -->
 <project name="Spread" basedir="." default="main">
 
+	<property name="LDLibrary.dir">f:/dist/libs/LDLibrary</property>
+	<property name="JavaLauncher.dir">f:/dist/tools/JavaLauncher</property>
+	<property name="jre.dir">jre</property>
+	
 	<property name="build-drive">f:</property>
 	<property name="project.name">Spread</property>
 	
@@ -32,7 +27,7 @@
 	<property name="input.res.dir" value="res" />
 
 	<!-- Output directories -->
-	<property name="base.output.dir" value="${build-drive}/dist/java/${project.name}" />
+	<property name="base.output.dir" value="${build-drive}/dist/games/${project.name}" />
 
 	<property name="build.dir" value="${base.output.dir}/build" />
 	<property name="dist.dir" value="${base.output.dir}/dist" />
@@ -47,8 +42,8 @@
 	<target name="clean">
 		<delete dir="${build.dir}" />
 		<!-- <delete dir="${base.output.dir}" /> -->
-		<delete dir="${dist.dir}/res" />
-		<!-- <delete dir="${dist.lib}" /> -->
+		<delete dir="${dist.res}" />
+		<delete dir="${dist.lib}" />
 		<!-- <delete dir="${dist.doc}" /> -->
 		<!-- <delete dir="${dist.jre}" /> -->
 	</target>
@@ -67,14 +62,14 @@
 	<target name="copy.dep">
 		<!-- Copy the LDLibrary class files into the game build directory so the sources are avaiable during ocmpilation -->
 		<copy todir="${build.dir}">
-			<fileset dir="f:/dist/java/LDLibrary/build">
+			<fileset dir="${LDLibrary.dir}/build">
 				<include name="**/*.*" />
 			</fileset>
 		</copy>
 
 		<!-- Copy the LDLibrary and its dependencies JARs into the game distribution directory. --> 
 		<copy todir="${dist.dir}/">
-			<fileset dir="f:/dist/java/LDLibrary/bin">
+			<fileset dir="${LDLibrary.dir}/bin">
 				<include name="**/*.jar" />
 				<exclude name="**/*javadoc*"/>
 				<exclude name="**/*sources*"/>
@@ -106,7 +101,7 @@
 	<!-- Define the set of .jar files in the input lib dir as the classpath -->
 	<path id="build.class.path">
 		<fileset dir="${input.lib.dir}" includes="**/*.jar" />
-		<fileset dir="f:/dist/java/LDLibrary/bin" includes="**/*.jar" />
+		<fileset dir="${LDLibrary.dir}/bin" includes="**/*.jar" />
 	</path>
 
 	<!-- We will add this jar files to the manifests classpath -->
@@ -165,7 +160,7 @@
 	</target>
 	
 	<target name="notify.jre" depends="check.jre" if="jre.dir.exists">
-		<echo message="${dist.jre} exists. Not copying JRE" />
+		<echo message="${dist.jre} already exists. Not copying JRE" />
 	</target>
 	
 	<target name="check.jre">
@@ -175,7 +170,25 @@
 	</target>
 	
 	<!-- copy the custom launcher -->
+	<target name="copy.launcher">
+		<!-- Copy the JavaLauncher -->
+		<echo message="Copying JavaLauncher to dist directory" />
+		<copy todir="${dist.dir}">
+			<fileset dir="${JavaLauncher.dir}">
+				<include name="**/*.exe" />
+			</fileset>
+		</copy>
+	</target>
 	
-	<target name="main" depends="clean, init, copy.dep, compile, createjar, notify.jre, bundle.jre" />
+	<target name="config.launcher">
+		<!-- Configure the JavaLauncher -->
+		<echo message="Configuring the JavaLauncher" />
+		<exec executable="cmd">
+			<arg value="/c" />
+			<arg value='${dist.dir}/JavaLauncher -c  -jre ${jre.dir} -n ${project.name} -j core -p "debug=info" -w www.google.co.uk' />
+		</exec>
+	</target>
+	
+	<target name="main" depends="clean, init, copy.dep, compile, createjar, notify.jre, bundle.jre, copy.launcher, config.launcher" />
 
 </project>
